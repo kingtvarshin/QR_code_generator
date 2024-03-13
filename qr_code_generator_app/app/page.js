@@ -1,6 +1,6 @@
 'use client';
 import { Input } from "@material-tailwind/react";
-import React from "react";
+import React,{ useState } from "react";
 import {
   Tabs,
   TabsHeader,
@@ -15,7 +15,7 @@ import {
 import { useQRCode } from 'next-qrcode';
 
 export default function Home() {
-  const { Canvas } = useQRCode();
+  const { SVG } = useQRCode();
   const data = [
     {
       label: "URL",
@@ -30,6 +30,42 @@ export default function Home() {
       desc: `Phone`,
     }
   ];
+
+  function Qr_code(props){
+    console.log(props)
+    var qr_text = props.title
+    if (props.title == ""){
+      qr_text="www.google.com"
+    }
+    return (
+      <SVG
+        text= {qr_text}
+        options={{
+          margin: 2,
+          width: 200,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF',
+          },
+        }}
+      />
+    );
+  }
+  
+  const [qr_value, setValue] = useState("www.google.com")
+
+  function onChange(event) {
+    try {
+      setValue(event.target.value)
+      console.log(qr_value)
+    }
+    catch(err) {
+      setValue("www.google.com")
+      console.log(err)
+    }
+    
+  }
+
   return (
     <div>
       <div>
@@ -48,7 +84,12 @@ export default function Home() {
             {data.map(({ value, desc }) => (
               <TabPanel className="m-2 inline-grid object-center justify-items-center" key={value} value={value}>
                 <div className="w-72">
-                  <Input id={value} color="blue" label={desc} />
+                  <Input 
+                    id={value}
+                    color="blue" 
+                    label={desc}
+                    onChange={onChange}
+                  />
                 </div>
               </TabPanel>
             ))}
@@ -57,19 +98,7 @@ export default function Home() {
       </div>
       <div className="w-full inline-grid place-items-center object-center h-64 m-2 justify-items-center">
         <div className="height_canvas">
-          <Canvas
-            text={'www.google.com'}
-            options={{
-              errorCorrectionLevel: 'M',
-              margin: 3,
-              scale: 4,
-              width: 200,
-              color: {
-                dark: '#000000',
-                light: '#FFFFFF',
-              },
-            }}
-          />
+          <Qr_code title={qr_value}/>
         </div>
       </div>
     </div>

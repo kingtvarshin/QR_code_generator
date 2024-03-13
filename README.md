@@ -12,3 +12,5 @@ http://localhost:3000
 URL
 PDF
 Phone
+
+<qr_code title="www.xyz.com"/>
