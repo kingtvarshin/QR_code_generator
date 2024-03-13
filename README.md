@@ -8,3 +8,7 @@ cd "into project"
 npm run dev
 
 http://localhost:3000
+
+URL
+PDF
+Phone
