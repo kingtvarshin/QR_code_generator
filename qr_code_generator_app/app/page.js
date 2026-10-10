@@ -50,6 +50,11 @@ export default function Home() {
 
   function handleLogoChange(logo) {
     dispatch({ type: logo ? "SET_LOGO" : "CLEAR_LOGO", logo });
+    // A logo covers enough modules that anything below High error correction tends to
+    // fail to scan — bump it automatically rather than let users print a dead code.
+    if (logo && state.options.errorCorrectionLevel !== "H") {
+      dispatch({ type: "SET_OPTION", key: "errorCorrectionLevel", value: "H" });
+    }
   }
 
   function handleDownloadLogged() {
