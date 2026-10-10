@@ -30,6 +30,10 @@ describe("phone", () => {
     expect(qrTypes.phone.encode({ phone: "+1 (555) 123-4567" })).toBe("tel:+15551234567");
   });
 
+  it("encodes a trailing extension as ;ext= instead of gluing it to the number", () => {
+    expect(qrTypes.phone.encode({ phone: "(555) 123-4567 ext 89" })).toBe("tel:5551234567;ext=89");
+  });
+
   it("rejects too-short numbers", () => {
     expect(qrTypes.phone.validate({ phone: "123" })).toHaveProperty("phone");
   });

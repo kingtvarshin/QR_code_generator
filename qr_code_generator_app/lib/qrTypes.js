@@ -7,6 +7,7 @@ import {
   looksLikeUrl,
   normalizePhoneDigits,
   normalizeUrl,
+  toTelUri,
 } from "./validators";
 
 // Each entry: { id, label, defaultFields, encode(fields) -> string, validate(fields) -> { [field]: message } }
@@ -57,7 +58,7 @@ export const qrTypes = {
       return errors;
     },
     encode(fields) {
-      return `tel:${normalizePhoneDigits(fields.phone)}`;
+      return toTelUri(fields.phone);
     },
     summary(fields) {
       return fields.phone;
