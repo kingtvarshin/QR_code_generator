@@ -1,0 +1,79 @@
+"use client";
+
+import { useRef } from "react";
+import {
+  LinkIcon,
+  DocumentTextIcon,
+  PhoneIcon,
+  ChatBubbleLeftIcon,
+  EnvelopeIcon,
+  WifiIcon,
+  IdentificationIcon,
+} from "@heroicons/react/24/solid";
+import { qrTypeOrder, qrTypes } from "@/lib/qrTypes";
+
+const iconsByType = {
+  url: LinkIcon,
+  text: DocumentTextIcon,
+  phone: PhoneIcon,
+  sms: ChatBubbleLeftIcon,
+  email: EnvelopeIcon,
+  wifi: WifiIcon,
+  vcard: IdentificationIcon,
+};
+
+export default function TypeSelector({ activeType, onChange }) {
+  const buttonRefs = useRef([]);
+
+  function handleKeyDown(event, index) {
+    const direction = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    if (event.key !== "Home" && event.key !== "End" && !direction) return;
+
+    event.preventDefault();
+    const lastIndex = qrTypeOrder.length - 1;
+    const nextIndex =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? lastIndex
+          : (index + direction + qrTypeOrder.length) % qrTypeOrder.length;
+
+    buttonRefs.current[nextIndex]?.focus();
+    onChange(qrTypeOrder[nextIndex]);
+  }
+
+  return (
+    <div
+      role="tablist"
+      aria-label="QR code type"
+      className="flex gap-1 overflow-x-auto [scrollbar-width:none] -mx-4 px-4 w-full sm:w-auto sm:mx-0 sm:justify-center sm:flex-wrap"
+    >
+      {qrTypeOrder.map((typeId, index) => {
+        const Icon = iconsByType[typeId];
+        const isActive = activeType === typeId;
+        return (
+          <button
+            key={typeId}
+            ref={(el) => {
+              buttonRefs.current[index] = el;
+            }}
+            type="button"
+            role="tab"
+            id={`tab-${typeId}`}
+            aria-controls="qr-form-panel"
+            aria-selected={isActive}
+            tabIndex={isActive ? 0 : -1}
+            onClick={() => onChange(typeId)}
+            onKeyDown={(event) => handleKeyDown(event, index)}
+            className={`shrink-0 snap-start flex items-center gap-2 min-h-11 px-3 rounded-lg text-sm font-medium whitespace-nowrap
+              focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600
+              ${isActive ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
+          >
+            <Icon className="w-5 h-5" aria-hidden="true" />
+            {qrTypes[typeId].label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
