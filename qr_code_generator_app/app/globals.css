@@ -36,3 +36,21 @@ body {
   border-width: 1px;
   border-color: black;
 }
+
+/* iOS Safari auto-zooms (and jumps the layout) when focusing an input with a
+   font-size under 16px. */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* WCAG 2.5.5 / Apple HIG recommend at least 44x44px touch targets. */
+button,
+[role="tab"],
+input[type="color"] {
+  min-height: 44px;
+  min-width: 44px;
+}

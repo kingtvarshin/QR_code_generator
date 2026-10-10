@@ -47,12 +47,23 @@ function RenderedQrCode({ text, options, logo }) {
     return <LogoCanvasPreview text={text} options={options} logo={logo} />;
   }
 
-  return <SVG text={text} options={toQrCodeOptions(options)} />;
+  return (
+    <div role="img" aria-label="QR code preview">
+      <SVG text={text} options={toQrCodeOptions(options)} />
+    </div>
+  );
 }
 
 export default function QRPreview({ text, options, logo, isReady, errorMessage }) {
   if (!isReady) {
-    return <Placeholder>{errorMessage || "Fill in the form to generate a QR code."}</Placeholder>;
+    return (
+      <>
+        <Placeholder>{errorMessage || "Fill in the form to generate a QR code."}</Placeholder>
+        <p className="sr-only" aria-live="polite">
+          {errorMessage || ""}
+        </p>
+      </>
+    );
   }
 
   return (
@@ -61,6 +72,9 @@ export default function QRPreview({ text, options, logo, isReady, errorMessage }
       fallback={<Placeholder>This content is too large to encode. Try a lower error-correction level or shorter input.</Placeholder>}
     >
       <RenderedQrCode text={text} options={options} logo={logo} />
+      <p className="sr-only" aria-live="polite">
+        QR code updated
+      </p>
     </ErrorBoundary>
   );
 }

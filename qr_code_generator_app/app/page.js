@@ -83,8 +83,8 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 max-w-5xl mx-auto">
-      <Typography variant="h3" color="blue-gray" className="mt-4">
+    <main className="flex flex-col items-center gap-6 p-4 max-w-5xl mx-auto">
+      <Typography as="h1" variant="h3" color="blue-gray" className="mt-4">
         QR Forge
       </Typography>
       <Typography variant="small" color="gray">
@@ -127,7 +127,7 @@ export default function Home() {
       </div>
 
       <div className="w-full flex flex-col items-center gap-2">
-        <Typography variant="h6" color="blue-gray">
+        <Typography as="h2" variant="h6" color="blue-gray">
           History
         </Typography>
         <HistoryPanel
@@ -137,6 +137,6 @@ export default function Home() {
           onRemove={removeItem}
         />
       </div>
-    </div>
+    </main>
   );
 }
