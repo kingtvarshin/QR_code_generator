@@ -149,11 +149,15 @@ export default function Home() {
       <TypeSelector activeType={state.activeType} onChange={(typeId) => dispatch({ type: "SET_ACTIVE_TYPE", typeId })} />
 
       <div className="flex flex-wrap justify-center gap-8 w-full">
+        {/* Below `sm`, the preview comes first so users see the result without
+            scrolling past the whole form while typing blind; at `sm` and up these
+            sit side by side and the order utilities are reset to source order. */}
         <div
           role="tabpanel"
           id="qr-form-panel"
           aria-labelledby={`tab-${state.activeType}`}
           onBlurCapture={handleFormBlurCapture}
+          className="order-2 sm:order-none"
         >
           <ActiveForm
             fields={activeFields}
@@ -163,7 +167,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="flex flex-col items-center gap-3">
+        <div className="order-1 sm:order-none flex flex-col items-center gap-3">
           <div className="height_canvas w-60 h-60 flex items-center justify-center overflow-hidden [&_svg]:w-full [&_svg]:h-full [&_canvas]:w-full [&_canvas]:h-full">
             <QRPreview
               text={debouncedEncoded}
@@ -189,12 +193,14 @@ export default function Home() {
           </p>
         </div>
 
-        <CustomizationPanel
-          options={state.options}
-          onOptionChange={handleOptionChange}
-          logo={state.logo}
-          onLogoChange={handleLogoChange}
-        />
+        <div className="order-3 sm:order-none">
+          <CustomizationPanel
+            options={state.options}
+            onOptionChange={handleOptionChange}
+            logo={state.logo}
+            onLogoChange={handleLogoChange}
+          />
+        </div>
       </div>
 
       <div className="w-full flex flex-col items-center gap-2">

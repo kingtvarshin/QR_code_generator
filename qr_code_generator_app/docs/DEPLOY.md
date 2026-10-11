@@ -47,11 +47,12 @@ was actually set on the *first* load (it's intentionally `null` on a true first
 visit — the toast only fires for a worker update on top of an existing one, not
 the initial install).
 
-## Security headers
+## Security and caching headers
 
 `public/_headers` covers Netlify and Cloudflare Pages (they read that file
 directly, no config needed). Other hosts need the equivalent configured at their
-own layer — see below. All three configs apply the same policy as
+own layer — see below. All three configs apply the same security headers,
+immutable caching on `/_next/static/*`, and `no-cache` on `/sw.js`/`/` as
 `public/_headers`; keep them in sync if that file changes. The CSP's
 `'unsafe-inline'` on `script-src` is a deliberate trade-off, not an oversight:
 the App Router's RSC-hydration script is inline and can't be given a nonce
@@ -61,6 +62,10 @@ doesn't have.
 ### nginx
 
 ```nginx
+# `add_header` does NOT inherit into a location block that sets its own
+# add_header (https://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header),
+# so the common headers are repeated in every location below that also needs its
+# own Cache-Control — otherwise those paths would silently lose them.
 server {
     # ... your existing server block (root, listen, etc.) ...
 
@@ -68,6 +73,34 @@ server {
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
     add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'" always;
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+
+    location /_next/static/ {
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'" always;
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+    }
+
+    location = /sw.js {
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'" always;
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    location = / {
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'" always;
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+        add_header Cache-Control "no-cache" always;
+    }
 }
 ```
 
@@ -78,12 +111,22 @@ your-domain.com {
     root * out
     file_server
 
+    # Unlike nginx's add_header, Caddy's top-level header directive applies to
+    # every response from this site regardless of path, so it doesn't need to be
+    # repeated below for the Cache-Control-specific matchers.
     header {
         X-Content-Type-Options "nosniff"
         Referrer-Policy "strict-origin-when-cross-origin"
         Permissions-Policy "camera=(), microphone=(), geolocation=()"
         Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+        Strict-Transport-Security "max-age=63072000; includeSubDomains"
     }
+
+    @static path /_next/static/*
+    header @static Cache-Control "public, max-age=31536000, immutable"
+
+    @noCache path /sw.js /
+    header @noCache Cache-Control "no-cache"
 }
 ```
 
@@ -105,9 +148,25 @@ this has to go in `vercel.json` instead, at the project root:
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
-        }
+        },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" }
       ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
     }
   ]
 }
 ```
+
+Vercel merges headers from every matching rule rather than requiring the common
+ones to be repeated per-path, unlike nginx above.

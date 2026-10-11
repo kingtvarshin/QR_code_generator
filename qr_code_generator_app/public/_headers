@@ -11,3 +11,18 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+
+# Hashed, content-addressed build output — safe to cache forever; a changed file
+# gets a new URL rather than invalidating this one.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Must always be revalidated: the service worker decides which cached version of
+# the app is served, so a stale cached copy of sw.js itself would never pick up a
+# new CACHE_NAME and the app could get stuck on an old release.
+/sw.js
+  Cache-Control: no-cache
+
+/
+  Cache-Control: no-cache

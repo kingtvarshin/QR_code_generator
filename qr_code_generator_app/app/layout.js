@@ -29,11 +29,11 @@ export const metadata = {
   twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
 };
 
+// The page itself has no dark styles (no `dark:` classes, no prefers-color-scheme
+// rules), so a dark theme-color here would turn a phone's status bar dark over an
+// otherwise all-white page — only declare the one color the page actually has.
 export const viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#1e293b" },
-  ],
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }) {

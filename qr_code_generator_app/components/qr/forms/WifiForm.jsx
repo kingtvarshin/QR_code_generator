@@ -37,6 +37,7 @@ export default function WifiForm({ fields, errors, onFieldChange }) {
           id="wifi-security"
           className={inputClass(false)}
           value={fields.security}
+          aria-describedby={fields.security === "SAE" ? "wifi-security-hint" : undefined}
           onChange={(e) => onFieldChange("security", e.target.value)}
         >
           <option value="WPA">WPA/WPA2</option>
@@ -44,6 +45,12 @@ export default function WifiForm({ fields, errors, onFieldChange }) {
           <option value="WEP">WEP</option>
           <option value="nopass">No password</option>
         </select>
+        {fields.security === "SAE" && (
+          <p id="wifi-security-hint" className="mt-1 text-sm text-gray-500">
+            Most WPA3 routers run in transition mode — choose WPA/WPA2 unless your network is
+            WPA3-only. Many phone cameras and older scanners don&apos;t recognize SAE.
+          </p>
+        )}
       </div>
 
       {fields.security !== "nopass" && (
