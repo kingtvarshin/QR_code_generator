@@ -6,7 +6,18 @@ export default function ServiceWorkerRegistration() {
   const [waitingWorker, setWaitingWorker] = useState(null);
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production") return;
+    if (process.env.NODE_ENV !== "production") {
+      // A worker (and its qr-forge-* caches) from an earlier production run/preview
+      // can be left controlling localhost — in dev it would otherwise serve stale or
+      // missing /_next/static chunks cache-first instead of Turbopack's dev output.
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((reg) => reg.unregister()));
+      }
+      if ("caches" in window) {
+        caches.keys().then((keys) => keys.filter((key) => key.startsWith("qr-forge-")).forEach((key) => caches.delete(key)));
+      }
+      return;
+    }
     if (!("serviceWorker" in navigator)) return;
 
     let registration;

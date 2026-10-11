@@ -7,6 +7,7 @@
     "prebuild": "node scripts/prebuild.mjs",
     "build": "next build",
     "start": "next start",
+    "preview": "next build && npx serve out -l 4000",
     "lint": "eslint . && npm run lint:classes",
     "lint:classes": "node scripts/lintClasses.mjs",
     "test": "vitest run"
