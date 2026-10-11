@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useQRCode } from "next-qrcode";
-import { Button, IconButton, Typography } from "@material-tailwind/react";
 import { StarIcon as StarOutline, TrashIcon } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { qrTypes } from "@/lib/qrTypes";
+import QrSvg from "./QrSvg";
 
 const UNDO_WINDOW_MS = 6000;
 
 function HistoryThumbnail({ item }) {
-  const { SVG } = useQRCode();
   let text;
   try {
     text = qrTypes[item.type]?.encode(item.fields);
@@ -20,7 +18,7 @@ function HistoryThumbnail({ item }) {
   if (!text) return <div className="w-8 h-8 shrink-0 bg-gray-100 rounded" aria-hidden="true" />;
   return (
     <div className="w-8 h-8 shrink-0" aria-hidden="true">
-      <SVG text={text} options={{ width: 32, margin: 0 }} />
+      <QrSvg text={text} options={{ width: 32, margin: 0 }} />
     </div>
   );
 }
@@ -61,42 +59,29 @@ export default function HistoryPanel({ items, onLoad, onToggleFavorite, onRemove
   return (
     <div className="w-72 flex flex-col gap-2">
       {undoEntry && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-2 text-sm bg-blue-gray-50 rounded px-2 py-1"
-        >
+        <div role="status" className="flex items-center justify-between gap-2 text-sm bg-blue-gray-50 rounded px-2 py-1">
           <span>Code removed</span>
-          <Button size="sm" variant="text" onClick={handleUndo}>
+          <button type="button" className="text-blue-600 font-medium px-2" onClick={handleUndo}>
             Undo
-          </Button>
+          </button>
         </div>
       )}
 
       {items.length === 0 ? (
-        <Typography variant="small" color="gray">
-          Codes you download will show up here.
-        </Typography>
+        <p className="text-sm text-gray-500">Codes you download will show up here.</p>
       ) : (
         <>
           <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto">
             {items.map((item) => (
-              <li
-                key={item.id}
-                className="flex items-center gap-2 border border-gray-200 rounded px-2 py-1"
-              >
+              <li key={item.id} className="flex items-center gap-2 border border-gray-200 rounded px-2 py-1">
                 <HistoryThumbnail item={item} />
-                <button
-                  type="button"
-                  className="text-left flex-1 min-w-0"
-                  onClick={() => onLoad(item)}
-                  title={item.label}
-                >
+                <button type="button" className="text-left flex-1 min-w-0" onClick={() => onLoad(item)} title={item.label}>
                   <span className="block truncate text-sm">{item.label}</span>
                   <span className="block text-xs text-gray-500">{formatTimestamp(item.createdAt)}</span>
                 </button>
-                <IconButton
-                  size="sm"
-                  variant="text"
+                <button
+                  type="button"
+                  className="p-2 rounded hover:bg-gray-100"
                   aria-label={item.isFavorite ? `Unfavorite ${item.label}` : `Favorite ${item.label}`}
                   aria-pressed={item.isFavorite}
                   onClick={() => onToggleFavorite(item.id)}
@@ -106,21 +91,21 @@ export default function HistoryPanel({ items, onLoad, onToggleFavorite, onRemove
                   ) : (
                     <StarOutline className="w-4 h-4" />
                   )}
-                </IconButton>
-                <IconButton
-                  size="sm"
-                  variant="text"
+                </button>
+                <button
+                  type="button"
+                  className="p-2 rounded hover:bg-gray-100"
                   aria-label={`Delete ${item.label}`}
                   onClick={() => handleRemove(item)}
                 >
                   <TrashIcon className="w-4 h-4 text-red-500" />
-                </IconButton>
+                </button>
               </li>
             ))}
           </ul>
-          <Button size="sm" variant="text" color="red" className="self-start" onClick={onClearAll}>
+          <button type="button" className="self-start text-sm text-red-600 font-medium px-2 py-1" onClick={onClearAll}>
             Clear all (keeps favorites)
-          </Button>
+          </button>
         </>
       )}
     </div>

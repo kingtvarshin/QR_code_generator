@@ -1,18 +1,19 @@
 "use client";
 
-import { Input, Textarea } from "@material-tailwind/react";
 import FieldError from "./FieldError";
+import { inputClass, labelClass } from "./styles";
 
 export default function EmailForm({ fields, errors, onFieldChange }) {
   return (
     <div className="w-72 flex flex-col gap-3">
       <div>
-        <Input
+        <label htmlFor="email-email" className={labelClass}>
+          Email address
+        </label>
+        <input
           id="email-email"
-          label="Email address"
-          color="blue"
+          className={inputClass(Boolean(errors.email))}
           value={fields.email}
-          error={Boolean(errors.email)}
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "email-email-error" : undefined}
           onChange={(e) => onFieldChange("email", e.target.value)}
@@ -21,26 +22,31 @@ export default function EmailForm({ fields, errors, onFieldChange }) {
           inputMode="email"
           autoComplete="email"
           autoCapitalize="off"
-          labelProps={{ htmlFor: "email-email" }}
         />
         <FieldError id="email-email-error" message={errors.email} />
       </div>
-      <Input
-        id="email-subject"
-        label="Subject (optional)"
-        color="blue"
-        value={fields.subject}
-        onChange={(e) => onFieldChange("subject", e.target.value)}
-        labelProps={{ htmlFor: "email-subject" }}
-      />
-      <Textarea
-        id="email-body"
-        label="Body (optional)"
-        color="blue"
-        value={fields.body}
-        onChange={(e) => onFieldChange("body", e.target.value)}
-        labelProps={{ htmlFor: "email-body" }}
-      />
+      <div>
+        <label htmlFor="email-subject" className={labelClass}>
+          Subject (optional)
+        </label>
+        <input
+          id="email-subject"
+          className={inputClass(false)}
+          value={fields.subject}
+          onChange={(e) => onFieldChange("subject", e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="email-body" className={labelClass}>
+          Body (optional)
+        </label>
+        <textarea
+          id="email-body"
+          className={inputClass(false)}
+          value={fields.body}
+          onChange={(e) => onFieldChange("body", e.target.value)}
+        />
+      </div>
     </div>
   );
 }

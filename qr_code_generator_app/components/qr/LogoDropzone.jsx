@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@material-tailwind/react";
 
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/svg+xml", "image/webp"];
 
@@ -83,9 +82,13 @@ export default function LogoDropzone({ logo, onLogoChange }) {
         className="sr-only"
       />
       {logo && (
-        <Button size="sm" variant="text" color="red" className="mt-1" onClick={() => onLogoChange(null)}>
+        <button
+          type="button"
+          className="mt-1 text-sm text-red-600 font-medium px-2 py-1"
+          onClick={() => onLogoChange(null)}
+        >
           Remove logo
-        </Button>
+        </button>
       )}
     </div>
   );

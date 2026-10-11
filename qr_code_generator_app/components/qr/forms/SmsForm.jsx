@@ -1,18 +1,19 @@
 "use client";
 
-import { Input, Textarea } from "@material-tailwind/react";
 import FieldError from "./FieldError";
+import { inputClass, labelClass } from "./styles";
 
 export default function SmsForm({ fields, errors, onFieldChange }) {
   return (
     <div className="w-72 flex flex-col gap-3">
       <div>
-        <Input
+        <label htmlFor="sms-phone" className={labelClass}>
+          Phone number
+        </label>
+        <input
           id="sms-phone"
-          label="Phone number"
-          color="blue"
+          className={inputClass(Boolean(errors.phone))}
           value={fields.phone}
-          error={Boolean(errors.phone)}
           aria-invalid={Boolean(errors.phone)}
           aria-describedby={errors.phone ? "sms-phone-error" : undefined}
           onChange={(e) => onFieldChange("phone", e.target.value)}
@@ -20,18 +21,18 @@ export default function SmsForm({ fields, errors, onFieldChange }) {
           type="tel"
           inputMode="tel"
           autoComplete="tel"
-          labelProps={{ htmlFor: "sms-phone" }}
         />
         <FieldError id="sms-phone-error" message={errors.phone} />
       </div>
       <div>
-        <Textarea
+        <label htmlFor="sms-message" className={labelClass}>
+          Message (optional)
+        </label>
+        <textarea
           id="sms-message"
-          label="Message (optional)"
-          color="blue"
+          className={inputClass(false)}
           value={fields.message}
           onChange={(e) => onFieldChange("message", e.target.value)}
-          labelProps={{ htmlFor: "sms-message" }}
         />
       </div>
     </div>

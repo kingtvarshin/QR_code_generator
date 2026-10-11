@@ -1,8 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@material-tailwind/react";
 import { downloadPng, downloadJpeg, downloadSvg, buildFilename } from "@/lib/qrExport";
+
+function DownloadButton({ label, busy, disabled, onClick }) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="px-3 py-2 text-sm font-medium rounded bg-blue-600 text-white disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-700 disabled:hover:bg-gray-300"
+    >
+      {busy ? "…" : label}
+    </button>
+  );
+}
 
 export default function DownloadButtons({ text, options, logo, type, summary, disabled, onDownload }) {
   const [busy, setBusy] = useState(null);
@@ -22,42 +34,36 @@ export default function DownloadButtons({ text, options, logo, type, summary, di
 
   return (
     <div className="flex gap-2">
-      <Button
-        size="sm"
+      <DownloadButton
+        label="PNG"
+        busy={busy === "png"}
         disabled={disabled}
-        loading={busy === "png"}
         onClick={() =>
           handleDownload("png", () =>
             downloadPng(text, exportOptions, logo, buildFilename(type, summary, exportOptions.width, "png"))
           )
         }
-      >
-        PNG
-      </Button>
-      <Button
-        size="sm"
+      />
+      <DownloadButton
+        label="JPEG"
+        busy={busy === "jpeg"}
         disabled={disabled}
-        loading={busy === "jpeg"}
         onClick={() =>
           handleDownload("jpeg", () =>
             downloadJpeg(text, exportOptions, logo, buildFilename(type, summary, exportOptions.width, "jpg"))
           )
         }
-      >
-        JPEG
-      </Button>
-      <Button
-        size="sm"
+      />
+      <DownloadButton
+        label="SVG"
+        busy={busy === "svg"}
         disabled={disabled}
-        loading={busy === "svg"}
         onClick={() =>
           handleDownload("svg", () =>
             downloadSvg(text, exportOptions, logo, buildFilename(type, summary, exportOptions.width, "svg"))
           )
         }
-      >
-        SVG
-      </Button>
+      />
     </div>
   );
 }

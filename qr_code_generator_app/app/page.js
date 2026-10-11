@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Alert, Typography } from "@material-tailwind/react";
+import dynamic from "next/dynamic";
 import TypeSelector from "@/components/qr/TypeSelector";
 import QRPreview from "@/components/qr/QRPreview";
 import CustomizationPanel from "@/components/qr/CustomizationPanel";
 import DownloadButtons from "@/components/qr/DownloadButtons";
-import HistoryPanel from "@/components/qr/HistoryPanel";
 import { formsByType } from "@/components/qr/forms";
+
+// Below-the-fold and not needed for the primary generate/download flow — defer its
+// chunk until after the initial paint.
+const HistoryPanel = dynamic(() => import("@/components/qr/HistoryPanel"));
 import { qrTypes } from "@/lib/qrTypes";
 import { useQrBuilder } from "@/lib/useQrBuilder";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
@@ -110,13 +113,11 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center gap-6 p-4 max-w-5xl mx-auto">
-      <Typography as="h1" variant="h3" color="blue-gray" className="mt-4">
-        QR Forge
-      </Typography>
-      <Typography variant="small" color="gray">
+      <h1 className="mt-4 text-3xl font-semibold text-blue-gray-900">QR Forge</h1>
+      <p className="text-sm text-gray-600">
         Generate, customize, and download QR codes for URLs, text, phone, SMS, email, WiFi, and
         contact cards.
-      </Typography>
+      </p>
 
       <TypeSelector activeType={state.activeType} onChange={(typeId) => dispatch({ type: "SET_ACTIVE_TYPE", typeId })} />
 
@@ -144,10 +145,10 @@ export default function Home() {
             disabled={!isReady}
             onDownload={handleDownloadLogged}
           />
-          <Typography variant="small" color={payloadBytes > capacityBytes ? "red" : "gray"}>
+          <p className={`text-sm ${payloadBytes > capacityBytes ? "text-red-600" : "text-gray-500"}`}>
             {payloadBytes.toLocaleString()} / {capacityBytes.toLocaleString()} bytes at{" "}
             {state.options.errorCorrectionLevel}
-          </Typography>
+          </p>
         </div>
 
         <CustomizationPanel
@@ -159,13 +160,11 @@ export default function Home() {
       </div>
 
       <div className="w-full flex flex-col items-center gap-2">
-        <Typography as="h2" variant="h6" color="blue-gray">
-          History
-        </Typography>
+        <h2 className="text-lg font-semibold text-blue-gray-900">History</h2>
         {historyError && (
-          <Alert color="amber" variant="ghost" className="w-72">
+          <div role="status" className="w-72 text-sm text-amber-800 bg-amber-50 rounded px-3 py-2">
             Couldn&apos;t save to history — your browser&apos;s local storage may be full.
-          </Alert>
+          </div>
         )}
         <HistoryPanel
           items={history.items}

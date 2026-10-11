@@ -1,17 +1,18 @@
 "use client";
 
-import { Input } from "@material-tailwind/react";
 import FieldError from "./FieldError";
+import { inputClass, labelClass } from "./styles";
 
 export default function UrlForm({ fields, errors, onFieldChange }) {
   return (
     <div className="w-72">
-      <Input
+      <label htmlFor="url-url" className={labelClass}>
+        Website URL
+      </label>
+      <input
         id="url-url"
-        label="Website URL"
-        color="blue"
+        className={inputClass(Boolean(errors.url))}
         value={fields.url}
-        error={Boolean(errors.url)}
         aria-invalid={Boolean(errors.url)}
         aria-describedby={errors.url ? "url-url-error" : undefined}
         onChange={(e) => onFieldChange("url", e.target.value)}
@@ -21,7 +22,6 @@ export default function UrlForm({ fields, errors, onFieldChange }) {
         autoComplete="url"
         autoCapitalize="off"
         spellCheck={false}
-        labelProps={{ htmlFor: "url-url" }}
       />
       <FieldError id="url-url-error" message={errors.url} />
     </div>

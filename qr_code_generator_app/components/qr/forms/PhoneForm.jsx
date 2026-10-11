@@ -1,17 +1,18 @@
 "use client";
 
-import { Input } from "@material-tailwind/react";
 import FieldError from "./FieldError";
+import { inputClass, labelClass } from "./styles";
 
 export default function PhoneForm({ fields, errors, onFieldChange }) {
   return (
     <div className="w-72">
-      <Input
+      <label htmlFor="phone-phone" className={labelClass}>
+        Phone number
+      </label>
+      <input
         id="phone-phone"
-        label="Phone number"
-        color="blue"
+        className={inputClass(Boolean(errors.phone))}
         value={fields.phone}
-        error={Boolean(errors.phone)}
         aria-invalid={Boolean(errors.phone)}
         aria-describedby={errors.phone ? "phone-phone-error" : undefined}
         onChange={(e) => onFieldChange("phone", e.target.value)}
@@ -19,7 +20,6 @@ export default function PhoneForm({ fields, errors, onFieldChange }) {
         type="tel"
         inputMode="tel"
         autoComplete="tel"
-        labelProps={{ htmlFor: "phone-phone" }}
       />
       <FieldError id="phone-phone-error" message={errors.phone} />
     </div>

@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useQRCode } from "next-qrcode";
-import { Typography } from "@material-tailwind/react";
 import ErrorBoundary from "./ErrorBoundary";
-import { renderQrCanvas, toQrCodeOptions } from "@/lib/qrExport";
+import QrSvg from "./QrSvg";
+import { renderQrCanvas } from "@/lib/qrExport";
 
 // The "size" setting is really the download/export resolution (up to 4096px) — the
 // on-screen preview always renders at this fixed, modest resolution and is scaled to
@@ -15,17 +14,14 @@ const PREVIEW_WIDTH = 240;
 function Placeholder({ children }) {
   return (
     <div className="w-60 h-60 flex items-center justify-center text-center px-4">
-      <Typography variant="small" color="gray">
-        {children}
-      </Typography>
+      <p className="text-sm text-gray-500">{children}</p>
     </div>
   );
 }
 
 // Renders through the same renderQrCanvas()/compositeLogo() path used for PNG/JPEG
 // export, so the preview and the downloaded file always match (aspect-ratio-safe
-// logo, background-colored plate) instead of relying on next-qrcode's own simpler
-// logo compositing (square stretch, no plate).
+// logo, background-colored plate).
 function LogoCanvasPreview({ text, options, logo }) {
   const canvasRef = useRef(null);
 
@@ -47,15 +43,13 @@ function LogoCanvasPreview({ text, options, logo }) {
 }
 
 function RenderedQrCode({ text, options, logo }) {
-  const { SVG } = useQRCode();
-
   if (logo?.dataUrl) {
     return <LogoCanvasPreview text={text} options={options} logo={logo} />;
   }
 
   return (
     <div role="img" aria-label="QR code preview">
-      <SVG text={text} options={toQrCodeOptions({ ...options, width: PREVIEW_WIDTH })} />
+      <QrSvg text={text} options={{ ...options, width: PREVIEW_WIDTH }} />
     </div>
   );
 }

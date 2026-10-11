@@ -1,6 +1,5 @@
 "use client";
 
-import { Select, Option, Typography, Alert } from "@material-tailwind/react";
 import { hasLowContrast, hasInvertedColors } from "@/lib/color";
 import LogoDropzone from "./LogoDropzone";
 
@@ -12,39 +11,53 @@ const EC_LEVEL_OPTIONS = [
   { value: "H", label: "High (H) — best with a logo" },
 ];
 
+const selectClassName =
+  "w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600";
+const labelClassName = "block mb-1 text-sm text-blue-gray-700";
+
 export default function CustomizationPanel({ options, onOptionChange, logo, onLogoChange }) {
   const lowContrast = hasLowContrast(options.colorDark, options.colorLight);
   const inverted = hasInvertedColors(options.colorDark, options.colorLight);
 
   return (
     <div className="w-72 flex flex-col gap-4">
-      <Typography as="h2" variant="h6" color="blue-gray">
-        Customize
-      </Typography>
+      <h2 className="text-lg font-semibold text-blue-gray-900">Customize</h2>
 
-      <Select
-        label="Error correction level"
-        value={options.errorCorrectionLevel}
-        onChange={(value) => onOptionChange("errorCorrectionLevel", value)}
-      >
-        {EC_LEVEL_OPTIONS.map((opt) => (
-          <Option key={opt.value} value={opt.value}>
-            {opt.label}
-          </Option>
-        ))}
-      </Select>
+      <div>
+        <label htmlFor="ec-level" className={labelClassName}>
+          Error correction level
+        </label>
+        <select
+          id="ec-level"
+          className={selectClassName}
+          value={options.errorCorrectionLevel}
+          onChange={(e) => onOptionChange("errorCorrectionLevel", e.target.value)}
+        >
+          {EC_LEVEL_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <Select
-        label="Download size (px)"
-        value={String(options.width)}
-        onChange={(value) => onOptionChange("width", Number(value))}
-      >
-        {SIZE_OPTIONS.map((size) => (
-          <Option key={size} value={String(size)}>
-            {size}px
-          </Option>
-        ))}
-      </Select>
+      <div>
+        <label htmlFor="download-size" className={labelClassName}>
+          Download size (px)
+        </label>
+        <select
+          id="download-size"
+          className={selectClassName}
+          value={String(options.width)}
+          onChange={(e) => onOptionChange("width", Number(e.target.value))}
+        >
+          {SIZE_OPTIONS.map((size) => (
+            <option key={size} value={String(size)}>
+              {size}px
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div>
         <label htmlFor="margin" className="text-sm text-blue-gray-700">
@@ -81,14 +94,14 @@ export default function CustomizationPanel({ options, onOptionChange, logo, onLo
       </div>
 
       {lowContrast && (
-        <Alert color="amber" variant="ghost">
+        <div role="status" className="text-sm text-amber-800 bg-amber-50 rounded px-3 py-2">
           These colors are low contrast and may be hard for scanners to read.
-        </Alert>
+        </div>
       )}
       {!lowContrast && inverted && (
-        <Alert color="amber" variant="ghost">
+        <div role="status" className="text-sm text-amber-800 bg-amber-50 rounded px-3 py-2">
           Lighter modules on a darker background can fail to scan on some readers.
-        </Alert>
+        </div>
       )}
 
       <LogoDropzone logo={logo} onLogoChange={onLogoChange} />
