@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import TypeSelector from "@/components/qr/TypeSelector";
 import QRPreview from "@/components/qr/QRPreview";
 import ScanCheckBadge from "@/components/qr/ScanCheckBadge";
+import MiniPreview from "@/components/qr/MiniPreview";
 import CustomizationPanel from "@/components/qr/CustomizationPanel";
 import DownloadButtons from "@/components/qr/DownloadButtons";
 import { formsByType } from "@/components/qr/forms";
@@ -19,7 +20,7 @@ import { useHistory } from "@/lib/useHistory";
 import { byteLength, capacityForLevel, exceedsCapacity, isNonEmpty } from "@/lib/validators";
 import { downscaleImageDataUrl } from "@/lib/image";
 import { usePersistedOptions } from "@/lib/usePersistedOptions";
-import { useScanCheck } from "@/lib/useScanCheck";
+import { scanStatusLabel, useScanCheck } from "@/lib/useScanCheck";
 import { generateId } from "@/lib/id";
 
 // How long to wait after the last change before updating the single accessible
@@ -82,6 +83,7 @@ export default function Home() {
   }
 
   const scanResult = useScanCheck(debouncedEncoded, state.options, state.logo, isReady);
+  const previewRef = useRef(null);
 
   // One always-mounted live region (rendered unconditionally below) instead of
   // several that mount/unmount with the QR or the scan badge — a screen reader
@@ -90,8 +92,12 @@ export default function Home() {
   // worked by accident. Debounced so it doesn't fire mid-keystroke.
   const [announcement, setAnnouncement] = useState("");
   useEffect(() => {
-    const scanLabel = scanResult ? (scanResult.ok ? "Scannable." : "May not scan.") : "";
-    const message = errorMessage ? `Error: ${errorMessage}` : isReady ? `QR code updated. ${scanLabel}`.trim() : "";
+    const scanLabel = scanStatusLabel(scanResult);
+    const message = errorMessage
+      ? `Error: ${errorMessage}`
+      : isReady
+        ? `QR code updated.${scanLabel ? ` ${scanLabel}.` : ""}`
+        : "";
     const timer = setTimeout(() => setAnnouncement(message), ANNOUNCE_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [errorMessage, isReady, scanResult]);
@@ -159,14 +165,6 @@ export default function Home() {
     });
   }
 
-  // Below `sm` with no payload yet, the form goes first — pushing it below an
-  // empty 240px placeholder box left new users scrolling to find the first
-  // input. Once there's a real QR to see, the preview goes first instead so
-  // typing doesn't happen blind. At `sm` and up these order utilities reset to
-  // source order (form, preview, customize side by side).
-  const mobileFormOrder = isReady ? "order-2" : "order-1";
-  const mobilePreviewOrder = isReady ? "order-1" : "order-2";
-
   return (
     <main className="flex flex-col items-center gap-6 p-4 max-w-5xl mx-auto">
       <h1 className="mt-4 text-3xl font-semibold text-slate-900">QR Forge</h1>
@@ -181,12 +179,18 @@ export default function Home() {
       <TypeSelector activeType={state.activeType} onChange={(typeId) => dispatch({ type: "SET_ACTIVE_TYPE", typeId })} />
 
       <div className="flex flex-wrap justify-center gap-8 w-full">
+        {/* Mobile order is always form, then preview, then customize — never
+            reordered by readiness. Swapping the preview above a field the user is
+            still typing into (as an earlier version did) shoved that field behind
+            the on-screen keyboard the moment the payload became valid, and could
+            flip back and forth while editing. MiniPreview below brings the result
+            to the user instead of moving content underneath them. */}
         <div
           role="tabpanel"
           id="qr-form-panel"
           aria-labelledby={`tab-${state.activeType}`}
           onBlurCapture={handleFormBlurCapture}
-          className={`${mobileFormOrder} sm:order-none`}
+          className="order-1 sm:order-none"
         >
           <ActiveForm
             fields={activeFields}
@@ -196,8 +200,11 @@ export default function Home() {
           />
         </div>
 
-        <div className={`${mobilePreviewOrder} sm:order-none flex flex-col items-center gap-3`}>
-          <div className="height_canvas w-60 h-60 flex items-center justify-center overflow-hidden [&_svg]:w-full [&_svg]:h-full [&_canvas]:w-full [&_canvas]:h-full">
+        <div className="order-2 sm:order-none flex flex-col items-center gap-3">
+          <div
+            ref={previewRef}
+            className="height_canvas w-60 h-60 flex items-center justify-center overflow-hidden [&_svg]:w-full [&_svg]:h-full [&_canvas]:w-full [&_canvas]:h-full"
+          >
             <QRPreview
               text={debouncedEncoded}
               options={state.options}
@@ -234,6 +241,8 @@ export default function Home() {
           />
         </div>
       </div>
+
+      <MiniPreview previewRef={previewRef} text={debouncedEncoded} options={state.options} isReady={isReady} scanResult={scanResult} />
 
       <div className="w-full flex flex-col items-center gap-2">
         <h2 className="text-lg font-semibold text-slate-900">History</h2>

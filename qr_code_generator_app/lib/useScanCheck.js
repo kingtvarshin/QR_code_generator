@@ -45,3 +45,10 @@ export function useScanCheck(text, options, logo, isReady) {
 
   return result;
 }
+
+// Shared short label for the scan-check result, so page.js's live announcement
+// and MiniPreview's status text can't drift out of sync with each other.
+export function scanStatusLabel(result) {
+  if (!result) return null;
+  return result.ok ? "Scannable" : "May not scan";
+}
