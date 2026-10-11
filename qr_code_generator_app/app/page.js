@@ -4,6 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import TypeSelector from "@/components/qr/TypeSelector";
 import QRPreview from "@/components/qr/QRPreview";
+import ScanCheckBadge from "@/components/qr/ScanCheckBadge";
 import CustomizationPanel from "@/components/qr/CustomizationPanel";
 import DownloadButtons from "@/components/qr/DownloadButtons";
 import { formsByType } from "@/components/qr/forms";
@@ -137,6 +138,7 @@ export default function Home() {
               errorMessage={errorMessage}
             />
           </div>
+          <ScanCheckBadge text={debouncedEncoded} options={state.options} logo={state.logo} isReady={isReady} />
           <DownloadButtons
             text={debouncedEncoded}
             options={state.options}
