@@ -55,15 +55,11 @@ function RenderedQrCode({ text, options, logo }) {
 }
 
 export default function QRPreview({ text, options, logo, isReady, errorMessage }) {
+  // No live-announced duplicate of errorMessage here — it's already exposed via
+  // the invalid field's own aria-describedby, so a screen reader user hears it
+  // once, when they reach that field, rather than twice on every keystroke.
   if (!isReady) {
-    return (
-      <>
-        <Placeholder>{errorMessage || "Fill in the form to generate a QR code."}</Placeholder>
-        <p className="sr-only" aria-live="polite">
-          {errorMessage || ""}
-        </p>
-      </>
-    );
+    return <Placeholder>{errorMessage || "Fill in the form to generate a QR code."}</Placeholder>;
   }
 
   return (

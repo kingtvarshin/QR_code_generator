@@ -25,7 +25,18 @@ export default function Home() {
   const [state, dispatch] = useQrBuilder();
   const { history, addItem, removeItem, toggleFavorite, clearAll } = useHistory();
   const [historyError, setHistoryError] = useState(false);
+  const [touchedFields, setTouchedFields] = useState({});
+  const [touchedForType, setTouchedForType] = useState(state.activeType);
   usePersistedOptions(state.options, (options) => dispatch({ type: "MERGE_OPTIONS", options }));
+
+  // Errors are type-scoped — don't carry a "touched" flag from one type's field into
+  // another type's same-named field after switching tabs. Reset synchronously during
+  // render (React's documented pattern for state that depends on a changed prop)
+  // rather than in an effect, which would otherwise cascade an extra render.
+  if (touchedForType !== state.activeType) {
+    setTouchedForType(state.activeType);
+    setTouchedFields({});
+  }
 
   const activeTypeDef = qrTypes[state.activeType];
   const activeFields = state.fields[state.activeType];
@@ -38,11 +49,25 @@ export default function Home() {
   const payloadBytes = byteLength(debouncedEncoded);
   const capacityBytes = capacityForLevel(state.options.errorCorrectionLevel);
 
-  // Only surface a field's error once the user has actually put something in it —
-  // an empty required field is the default state, not a mistake worth flagging in red.
+  // A field's error only appears once the user has put something in it, and only
+  // once they've either left the field (blurred) or paused for 600ms — not on
+  // every keystroke, which would make the message flicker while still typing.
+  const debouncedFields = useDebouncedValue(activeFields, 600);
   const displayErrors = Object.fromEntries(
-    Object.entries(errors).filter(([field]) => isNonEmpty(activeFields[field]))
+    Object.entries(errors).filter(([field]) => {
+      if (!isNonEmpty(activeFields[field])) return false;
+      const idle = activeFields[field] === debouncedFields[field];
+      return idle || touchedFields[field];
+    })
   );
+
+  function handleFormBlurCapture(event) {
+    const prefix = `${state.activeType}-`;
+    const id = event.target.id || "";
+    if (!id.startsWith(prefix)) return;
+    const field = id.slice(prefix.length);
+    setTouchedFields((prev) => (prev[field] ? prev : { ...prev, [field]: true }));
+  }
 
   let errorMessage;
   if (Object.keys(displayErrors).length > 0) errorMessage = Object.values(displayErrors)[0];
@@ -124,7 +149,12 @@ export default function Home() {
       <TypeSelector activeType={state.activeType} onChange={(typeId) => dispatch({ type: "SET_ACTIVE_TYPE", typeId })} />
 
       <div className="flex flex-wrap justify-center gap-8 w-full">
-        <div role="tabpanel" id="qr-form-panel" aria-labelledby={`tab-${state.activeType}`}>
+        <div
+          role="tabpanel"
+          id="qr-form-panel"
+          aria-labelledby={`tab-${state.activeType}`}
+          onBlurCapture={handleFormBlurCapture}
+        >
           <ActiveForm
             fields={activeFields}
             errors={displayErrors}

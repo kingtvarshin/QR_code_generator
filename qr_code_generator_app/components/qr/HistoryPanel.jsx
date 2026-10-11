@@ -6,7 +6,7 @@ import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { qrTypes } from "@/lib/qrTypes";
 import QrSvg from "./QrSvg";
 
-const UNDO_WINDOW_MS = 6000;
+const UNDO_WINDOW_MS = 9000;
 
 function HistoryThumbnail({ item }) {
   let text;
@@ -39,14 +39,26 @@ function formatTimestamp(ms) {
 export default function HistoryPanel({ items, onLoad, onToggleFavorite, onRemove, onRestore, onClearAll }) {
   const [undoEntry, setUndoEntry] = useState(null);
   const undoTimerRef = useRef(null);
+  const undoButtonRef = useRef(null);
 
   useEffect(() => () => clearTimeout(undoTimerRef.current), []);
 
+  // Focus would otherwise drop to <body> once the clicked delete button is removed
+  // from the DOM — move it to the Undo action so keyboard/screen-reader users land
+  // somewhere meaningful instead of losing their place entirely.
+  useEffect(() => {
+    if (undoEntry) undoButtonRef.current?.focus();
+  }, [undoEntry]);
+
+  function startUndoTimer() {
+    clearTimeout(undoTimerRef.current);
+    undoTimerRef.current = setTimeout(() => setUndoEntry(null), UNDO_WINDOW_MS);
+  }
+
   function handleRemove(item) {
     onRemove(item.id);
-    clearTimeout(undoTimerRef.current);
     setUndoEntry(item);
-    undoTimerRef.current = setTimeout(() => setUndoEntry(null), UNDO_WINDOW_MS);
+    startUndoTimer();
   }
 
   function handleUndo() {
@@ -59,9 +71,16 @@ export default function HistoryPanel({ items, onLoad, onToggleFavorite, onRemove
   return (
     <div className="w-72 flex flex-col gap-2">
       {undoEntry && (
-        <div role="status" className="flex items-center justify-between gap-2 text-sm bg-slate-50 rounded px-2 py-1">
+        <div
+          role="status"
+          className="flex items-center justify-between gap-2 text-sm bg-slate-50 rounded px-2 py-1"
+          onMouseEnter={() => clearTimeout(undoTimerRef.current)}
+          onMouseLeave={startUndoTimer}
+          onFocus={() => clearTimeout(undoTimerRef.current)}
+          onBlur={startUndoTimer}
+        >
           <span>Code removed</span>
-          <button type="button" className="text-blue-600 font-medium px-2" onClick={handleUndo}>
+          <button ref={undoButtonRef} type="button" className="text-blue-600 font-medium px-2" onClick={handleUndo}>
             Undo
           </button>
         </div>

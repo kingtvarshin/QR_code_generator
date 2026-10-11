@@ -80,6 +80,8 @@ export default function LogoDropzone({ logo, onLogoChange }) {
         accept={ACCEPTED_TYPES.join(",")}
         onChange={(e) => handleFile(e.target.files?.[0])}
         className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
       />
       {logo && (
         <button
