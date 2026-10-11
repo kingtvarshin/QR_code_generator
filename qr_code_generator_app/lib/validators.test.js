@@ -4,6 +4,8 @@ import {
   exceedsCapacity,
   isValidEmail,
   isValidPhone,
+  isValidUpiAmount,
+  isValidUpiVpa,
   looksLikeUrl,
   normalizePhoneDigits,
   normalizeUrl,
@@ -92,6 +94,36 @@ describe("escapeWifiField", () => {
 
   it("escapes semicolons, commas, quotes, and colons", () => {
     expect(escapeWifiField('a;b,c"d:e')).toBe('a\\;b\\,c\\"d\\:e');
+  });
+});
+
+describe("isValidUpiVpa", () => {
+  it("accepts a normal VPA", () => {
+    expect(isValidUpiVpa("jane.doe_1@okbank")).toBe(true);
+  });
+
+  it("rejects a VPA missing the @handle, or with a non-letter handle", () => {
+    expect(isValidUpiVpa("janedoe")).toBe(false);
+    expect(isValidUpiVpa("jane@123")).toBe(false);
+    expect(isValidUpiVpa("")).toBe(false);
+  });
+});
+
+describe("isValidUpiAmount", () => {
+  it("treats empty as valid (amount is optional)", () => {
+    expect(isValidUpiAmount("")).toBe(true);
+  });
+
+  it("accepts a positive amount with up to 2 decimals", () => {
+    expect(isValidUpiAmount("100")).toBe(true);
+    expect(isValidUpiAmount("100.5")).toBe(true);
+    expect(isValidUpiAmount("100.50")).toBe(true);
+  });
+
+  it("rejects zero, negative, or more than 2 decimals", () => {
+    expect(isValidUpiAmount("0")).toBe(false);
+    expect(isValidUpiAmount("-5")).toBe(false);
+    expect(isValidUpiAmount("10.999")).toBe(false);
   });
 });
 

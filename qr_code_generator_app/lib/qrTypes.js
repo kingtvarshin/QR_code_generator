@@ -4,6 +4,8 @@ import {
   isNonEmpty,
   isValidEmail,
   isValidPhone,
+  isValidUpiAmount,
+  isValidUpiVpa,
   looksLikeUrl,
   normalizePhoneDigits,
   normalizeUrl,
@@ -183,9 +185,60 @@ export const qrTypes = {
       return [fields.firstName, fields.lastName].filter(isNonEmpty).join(" ");
     },
   },
+
+  whatsapp: {
+    id: "whatsapp",
+    label: "WhatsApp",
+    defaultFields: { phone: "", message: "" },
+    validate(fields) {
+      const errors = {};
+      if (!isNonEmpty(fields.phone)) errors.phone = "Enter a phone number with country code.";
+      else if (!isValidPhone(fields.phone)) errors.phone = "Enter a valid phone number.";
+      return errors;
+    },
+    encode(fields) {
+      // wa.me takes bare digits (no "+", no formatting) — the leading country
+      // code is still required, just not visually marked in the output.
+      const digits = normalizePhoneDigits(fields.phone).replace("+", "");
+      const query = isNonEmpty(fields.message) ? `?text=${encodeURIComponent(fields.message)}` : "";
+      return `https://wa.me/${digits}${query}`;
+    },
+    summary(fields) {
+      return fields.phone;
+    },
+  },
+
+  upi: {
+    id: "upi",
+    label: "UPI Payment",
+    defaultFields: { vpa: "", payeeName: "", amount: "", note: "" },
+    validate(fields) {
+      const errors = {};
+      if (!isNonEmpty(fields.vpa)) errors.vpa = "Enter a UPI ID (VPA).";
+      else if (!isValidUpiVpa(fields.vpa)) errors.vpa = "Enter a valid UPI ID, e.g. name@bank";
+      if (!isNonEmpty(fields.payeeName)) errors.payeeName = "Enter the payee name.";
+      if (!isValidUpiAmount(fields.amount)) errors.amount = "Enter a valid amount (up to 2 decimals).";
+      if (isNonEmpty(fields.note) && fields.note.length > 80) {
+        errors.note = "Note must be 80 characters or fewer.";
+      }
+      return errors;
+    },
+    encode(fields) {
+      // Params left out entirely when empty, rather than sent as pa=&pn=&... —
+      // some UPI apps choke on empty query values instead of ignoring them.
+      const params = [`pa=${fields.vpa.trim()}`, `pn=${encodeURIComponent(fields.payeeName.trim())}`];
+      if (isNonEmpty(fields.amount)) params.push(`am=${fields.amount.trim()}`);
+      params.push("cu=INR");
+      if (isNonEmpty(fields.note)) params.push(`tn=${encodeURIComponent(fields.note.trim())}`);
+      return `upi://pay?${params.join("&")}`;
+    },
+    summary(fields) {
+      return fields.payeeName || fields.vpa;
+    },
+  },
 };
 
-export const qrTypeOrder = ["url", "text", "phone", "sms", "email", "wifi", "vcard"];
+export const qrTypeOrder = ["url", "text", "phone", "sms", "email", "wifi", "vcard", "whatsapp", "upi"];
 
 export function getDefaultFieldsByType() {
   return qrTypeOrder.reduce((acc, id) => {

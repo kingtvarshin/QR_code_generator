@@ -6,9 +6,11 @@ import {
   DocumentTextIcon,
   PhoneIcon,
   ChatBubbleLeftIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
   EnvelopeIcon,
   WifiIcon,
   IdentificationIcon,
+  CurrencyRupeeIcon,
 } from "@heroicons/react/24/solid";
 import { qrTypeOrder, qrTypes } from "@/lib/qrTypes";
 
@@ -20,6 +22,8 @@ const iconsByType = {
   email: EnvelopeIcon,
   wifi: WifiIcon,
   vcard: IdentificationIcon,
+  whatsapp: ChatBubbleOvalLeftEllipsisIcon,
+  upi: CurrencyRupeeIcon,
 };
 
 export default function TypeSelector({ activeType, onChange }) {

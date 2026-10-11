@@ -63,6 +63,22 @@ export function isValidPhone(value) {
   return digitCount >= 7 && digitCount <= 15;
 }
 
+const UPI_VPA_RE = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
+
+export function isValidUpiVpa(value) {
+  return isNonEmpty(value) && UPI_VPA_RE.test(value.trim());
+}
+
+const UPI_AMOUNT_RE = /^\d+(\.\d{1,2})?$/;
+
+// Amount is optional — an empty value is valid (just omitted from the encoded
+// URI); when present it must be a positive number with at most 2 decimals.
+export function isValidUpiAmount(value) {
+  if (!isNonEmpty(value)) return true;
+  const trimmed = value.trim();
+  return UPI_AMOUNT_RE.test(trimmed) && Number(trimmed) > 0;
+}
+
 // Escapes characters with special meaning inside a WIFI: URI field
 // (backslash must be escaped first, before the characters it would otherwise double-escape).
 export function escapeWifiField(value) {

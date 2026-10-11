@@ -142,3 +142,63 @@ describe("vcard", () => {
     expect(encoded).toContain("ORG:Acme\\, Inc.\\; R&D");
   });
 });
+
+describe("whatsapp", () => {
+  it("encodes bare digits with no message", () => {
+    expect(qrTypes.whatsapp.encode({ phone: "+1 555 123 4567", message: "" })).toBe(
+      "https://wa.me/15551234567"
+    );
+  });
+
+  it("appends an encoded message", () => {
+    expect(qrTypes.whatsapp.encode({ phone: "+15551234567", message: "Hi there!" })).toBe(
+      "https://wa.me/15551234567?text=Hi%20there!"
+    );
+  });
+
+  it("requires a phone number", () => {
+    expect(qrTypes.whatsapp.validate({ phone: "" })).toHaveProperty("phone");
+    expect(qrTypes.whatsapp.validate({ phone: "123" })).toHaveProperty("phone");
+    expect(qrTypes.whatsapp.validate({ phone: "+15551234567" })).not.toHaveProperty("phone");
+  });
+});
+
+describe("upi", () => {
+  it("encodes required fields only, with cu=INR always present", () => {
+    expect(qrTypes.upi.encode({ vpa: "name@bank", payeeName: "Jane Doe", amount: "", note: "" })).toBe(
+      "upi://pay?pa=name@bank&pn=Jane%20Doe&cu=INR"
+    );
+  });
+
+  it("encodes amount and note when present, in pa/pn/am/cu/tn order", () => {
+    expect(
+      qrTypes.upi.encode({ vpa: "name@bank", payeeName: "Jane Doe", amount: "100.50", note: "Rent" })
+    ).toBe("upi://pay?pa=name@bank&pn=Jane%20Doe&am=100.50&cu=INR&tn=Rent");
+  });
+
+  it("validates the VPA format", () => {
+    expect(qrTypes.upi.validate({ vpa: "not-a-vpa", payeeName: "Jane" })).toHaveProperty("vpa");
+    expect(qrTypes.upi.validate({ vpa: "name@bank", payeeName: "Jane" })).not.toHaveProperty("vpa");
+  });
+
+  it("requires a payee name", () => {
+    expect(qrTypes.upi.validate({ vpa: "name@bank", payeeName: "" })).toHaveProperty("payeeName");
+  });
+
+  it("validates amount format when present (positive, <=2 decimals)", () => {
+    expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", amount: "0" })).toHaveProperty("amount");
+    expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", amount: "-5" })).toHaveProperty("amount");
+    expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", amount: "10.999" })).toHaveProperty("amount");
+    expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", amount: "10.50" })).not.toHaveProperty("amount");
+    expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", amount: "" })).not.toHaveProperty("amount");
+  });
+
+  it("rejects notes longer than 80 characters", () => {
+    expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", note: "x".repeat(81) })).toHaveProperty(
+      "note"
+    );
+    expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", note: "x".repeat(80) })).not.toHaveProperty(
+      "note"
+    );
+  });
+});

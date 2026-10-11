@@ -5,6 +5,8 @@ import SmsForm from "./SmsForm";
 import EmailForm from "./EmailForm";
 import WifiForm from "./WifiForm";
 import VCardForm from "./VCardForm";
+import WhatsAppForm from "./WhatsAppForm";
+import UpiForm from "./UpiForm";
 
 export const formsByType = {
   url: UrlForm,
@@ -14,4 +16,6 @@ export const formsByType = {
   email: EmailForm,
   wifi: WifiForm,
   vcard: VCardForm,
+  whatsapp: WhatsAppForm,
+  upi: UpiForm,
 };
