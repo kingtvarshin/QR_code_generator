@@ -117,7 +117,7 @@ export const qrTypes = {
   wifi: {
     id: "wifi",
     label: "WiFi",
-    defaultFields: { ssid: "", password: "", security: "WPA", hidden: false },
+    defaultFields: { ssid: "", password: "", security: "WPA", hidden: false, rememberPassword: false },
     validate(fields) {
       const errors = {};
       if (!isNonEmpty(fields.ssid)) errors.ssid = "Enter a network name (SSID).";

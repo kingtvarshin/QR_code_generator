@@ -1,6 +1,7 @@
 "use client";
 
-import { Typography } from "@material-tailwind/react";
+import { useState } from "react";
+import { Alert, Typography } from "@material-tailwind/react";
 import TypeSelector from "@/components/qr/TypeSelector";
 import QRPreview from "@/components/qr/QRPreview";
 import CustomizationPanel from "@/components/qr/CustomizationPanel";
@@ -12,10 +13,12 @@ import { useQrBuilder } from "@/lib/useQrBuilder";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { useHistory } from "@/lib/useHistory";
 import { exceedsCapacity, isNonEmpty } from "@/lib/validators";
+import { downscaleImageDataUrl } from "@/lib/image";
 
 export default function Home() {
   const [state, dispatch] = useQrBuilder();
-  const { history, addItem, removeItem, toggleFavorite } = useHistory();
+  const { history, addItem, removeItem, toggleFavorite, clearAll } = useHistory();
+  const [historyError, setHistoryError] = useState(false);
 
   const activeTypeDef = qrTypes[state.activeType];
   const activeFields = state.fields[state.activeType];
@@ -57,17 +60,36 @@ export default function Home() {
     }
   }
 
-  function handleDownloadLogged() {
-    addItem({
+  async function handleDownloadLogged(format) {
+    // WiFi passwords are sensitive — only persist one if the user explicitly opted in.
+    const fieldsForHistory =
+      state.activeType === "wifi" && !activeFields.rememberPassword
+        ? { ...activeFields, password: "" }
+        : activeFields;
+
+    // Store a downscaled copy of the logo, not the full-resolution upload — a handful
+    // of multi-MB data-URLs can blow past localStorage's quota on their own.
+    let logoForHistory = null;
+    if (state.logo?.dataUrl) {
+      try {
+        logoForHistory = { ...state.logo, dataUrl: await downscaleImageDataUrl(state.logo.dataUrl) };
+      } catch {
+        logoForHistory = null;
+      }
+    }
+
+    const saved = addItem({
       id: crypto.randomUUID(),
       type: state.activeType,
-      fields: activeFields,
+      fields: fieldsForHistory,
       options: state.options,
-      logo: state.logo,
+      logo: logoForHistory,
       createdAt: Date.now(),
       isFavorite: false,
+      formats: [format],
       label: `${activeTypeDef.label}: ${activeTypeDef.summary(activeFields) || "(untitled)"}`,
     });
+    setHistoryError(!saved);
   }
 
   function handleLoadHistoryItem(item) {
@@ -113,6 +135,8 @@ export default function Home() {
             text={debouncedEncoded}
             options={state.options}
             logo={state.logo}
+            type={state.activeType}
+            summary={activeTypeDef.summary(activeFields)}
             disabled={!isReady}
             onDownload={handleDownloadLogged}
           />
@@ -130,11 +154,18 @@ export default function Home() {
         <Typography as="h2" variant="h6" color="blue-gray">
           History
         </Typography>
+        {historyError && (
+          <Alert color="amber" variant="ghost" className="w-72">
+            Couldn&apos;t save to history — your browser&apos;s local storage may be full.
+          </Alert>
+        )}
         <HistoryPanel
           items={history.items}
           onLoad={handleLoadHistoryItem}
           onToggleFavorite={toggleFavorite}
           onRemove={removeItem}
+          onRestore={addItem}
+          onClearAll={clearAll}
         />
       </div>
     </main>

@@ -1,5 +1,17 @@
 import QRCode from "qrcode";
 
+function slugify(value) {
+  return (value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "code";
+}
+
+export function buildFilename(type, summary, size, ext) {
+  return `qr-${type}-${slugify(summary)}-${size}.${ext}`;
+}
+
 // Maps our flat `options` state shape to the `qrcode` package's nested options shape.
 export function toQrCodeOptions(options) {
   return {

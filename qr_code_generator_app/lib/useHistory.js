@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import {
   addHistoryItem,
+  clearNonFavorites,
   createEmptyHistory,
   HISTORY_KEY,
   loadHistory,
@@ -49,8 +50,9 @@ function subscribe(callback) {
 
 function commit(next) {
   cache = next;
-  if (typeof window !== "undefined") saveHistory(window.localStorage, next);
+  const saved = typeof window === "undefined" ? true : saveHistory(window.localStorage, next);
   listeners.forEach((listener) => listener());
+  return saved;
 }
 
 export function useHistory() {
@@ -64,5 +66,6 @@ export function useHistory() {
     addItem: (item) => commit(addHistoryItem(getSnapshot(), item)),
     removeItem: (id) => commit(removeHistoryItem(getSnapshot(), id)),
     toggleFavorite: (id) => commit(toggleFavoriteItem(getSnapshot(), id)),
+    clearAll: () => commit(clearNonFavorites(getSnapshot())),
   };
 }

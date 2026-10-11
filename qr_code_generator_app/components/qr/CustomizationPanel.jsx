@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Select, Option, Typography, Alert, Button } from "@material-tailwind/react";
 import { hasLowContrast } from "@/lib/color";
 
@@ -15,6 +15,13 @@ const EC_LEVEL_OPTIONS = [
 export default function CustomizationPanel({ options, onOptionChange, logo, onLogoChange }) {
   const fileInputRef = useRef(null);
   const lowContrast = hasLowContrast(options.colorDark, options.colorLight);
+
+  // Covers not just the "Remove logo" click below but also an external clear —
+  // e.g. restoring a history item that has no logo — so re-selecting the same
+  // file afterward still fires a change event instead of being a no-op.
+  useEffect(() => {
+    if (!logo && fileInputRef.current) fileInputRef.current.value = "";
+  }, [logo]);
 
   function handleLogoFile(event) {
     const file = event.target.files?.[0];
@@ -112,10 +119,7 @@ export default function CustomizationPanel({ options, onOptionChange, logo, onLo
             variant="text"
             color="red"
             className="mt-1"
-            onClick={() => {
-              onLogoChange(null);
-              if (fileInputRef.current) fileInputRef.current.value = "";
-            }}
+            onClick={() => onLogoChange(null)}
           >
             Remove logo
           </Button>

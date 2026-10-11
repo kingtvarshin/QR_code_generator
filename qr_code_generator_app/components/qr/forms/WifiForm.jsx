@@ -69,6 +69,14 @@ export default function WifiForm({ fields, errors, onFieldChange }) {
         </div>
       )}
       <Switch id="wifi-hidden" label="Hidden network" checked={fields.hidden} onChange={(e) => onFieldChange("hidden", e.target.checked)} />
+      {fields.security !== "nopass" && (
+        <Switch
+          id="wifi-remember-password"
+          label="Remember password in history"
+          checked={fields.rememberPassword}
+          onChange={(e) => onFieldChange("rememberPassword", e.target.checked)}
+        />
+      )}
     </div>
   );
 }
