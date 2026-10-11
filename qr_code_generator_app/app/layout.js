@@ -14,8 +14,18 @@ export const metadata = {
   title,
   description,
   alternates: { canonical: "/" },
-  openGraph: { type: "website", title, description, url: "/" },
-  twitter: { card: "summary_large_image", title, description },
+  // Static files in public/ rather than dynamic next/og routes — a plain static
+  // file server serves these with the correct Content-Type from the .png
+  // extension alone, which a server-less extensionless route can't guarantee.
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  openGraph: { type: "website", title, description, url: "/", images: ["/og.png"] },
+  twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
 };
 
 export const viewport = {
