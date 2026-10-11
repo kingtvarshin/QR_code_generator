@@ -1,0 +1,13 @@
+# Security headers for static hosts that read this file (Netlify, Cloudflare Pages).
+# Next's `headers()` config is ignored under `output: "export"` (no server to apply
+# it), so this is the static-hosting equivalent. Vercel users: add the same headers
+# via vercel.json's `headers` array instead.
+#
+# script-src needs 'unsafe-inline' because the App Router's RSC-payload hydration
+# script is inline and unnoncable without a server runtime to generate nonces per
+# request — a real tradeoff of going fully static, not an oversight.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
