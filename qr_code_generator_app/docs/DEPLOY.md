@@ -158,14 +158,21 @@ Next's own `headers()` config is ignored under `output: "export"` (confirmed via
 a build warning — there's no server to apply it at request time), so the
 project's own `vercel.json` carries the same headers instead, plus
 `"buildCommand": "npm run build:deploy"` (so a real deploy gets the
-localhost-NEXT_PUBLIC_SITE_URL guard from above) and `"outputDirectory": "out"`.
-Vercel merges headers from every matching rule rather than requiring the common
-ones to be repeated per-path, unlike nginx above — keep `vercel.json` in sync
-with `public/_headers` if either changes.
+localhost-NEXT_PUBLIC_SITE_URL guard from above). Vercel merges headers from
+every matching rule rather than requiring the common ones to be repeated
+per-path, unlike nginx above — keep `vercel.json` in sync with `public/_headers`
+if either changes.
+
+**Don't set `outputDirectory` in `vercel.json`.** Vercel's Next.js framework
+integration auto-detects `output: "export"` from `next.config.mjs` and manages
+`out/` itself; pointing `outputDirectory` at `out` explicitly makes it look for
+`routes-manifest.json` (a `.next/`-only build artifact) inside `out/`, which
+fails every build with `NEXT_NO_ROUTES_MANIFEST` — confirmed by hitting this
+directly on a real deployment.
 
 Vercel auto-detects the Next.js framework and otherwise needs no project-level
 config beyond what's in `vercel.json`, **except**: if the Vercel project's
 repository root isn't this directory (e.g. this app lives in a subdirectory of
 a monorepo), set the project's **Root Directory** to this folder in the Vercel
-dashboard — `vercel.json`'s `outputDirectory`/`buildCommand` are relative to
-that setting, not the git repo root.
+dashboard — `vercel.json`'s `buildCommand` is relative to that setting, not the
+git repo root.
