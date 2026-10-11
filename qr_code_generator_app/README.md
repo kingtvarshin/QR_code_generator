@@ -28,7 +28,10 @@ Open [http://localhost:3000](http://localhost:3000).
   production build; in dev it actively unregisters any worker (and deletes any
   `qr-forge-*` caches) left over from an earlier `npm run preview`, so dev never
   gets served stale `/_next/static` chunks cache-first.
-- `npm run build` — static production export (output: "export") into `out/`
+- `npm run build` — static production export (output: "export") into `out/`.
+  Requires `NEXT_PUBLIC_SITE_URL` (e.g. `https://qrforge.app`) to be set — the
+  build fails on purpose otherwise, rather than shipping canonical/OG/sitemap
+  URLs pointing at `localhost` (see `docs/DEPLOY.md`).
 - `npm run preview` — build, then serve the static export at
   [http://localhost:4000](http://localhost:4000) via `serve`, on a different port
   than `npm run dev` so the two don't fight over the same service worker.

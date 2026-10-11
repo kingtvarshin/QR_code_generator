@@ -4,6 +4,14 @@
 `next.config.mjs`) — there's no API route or per-request SSR, so any static file
 host works: upload `out/` as-is.
 
+## Required environment
+
+`NEXT_PUBLIC_SITE_URL` (e.g. `https://qrforge.app`, no trailing slash) **must** be
+set before `npm run build` in production. It's used for `metadataBase`, the
+canonical link, Open Graph/Twitter image URLs, and the sitemap/robots `<loc>`
+values (`lib/siteUrl.js`). Without it, the build fails on purpose rather than
+silently shipping those pointing at `http://localhost:3000`.
+
 ## Verifying a redeploy is actually picked up (service worker)
 
 `public/sw.template.js` is turned into `public/sw.js` by `scripts/prebuild.mjs`
@@ -15,7 +23,8 @@ cache names — but the full browser lifecycle (install → waiting → the upda
 toast → reload) isn't something jsdom/vitest can exercise, since it depends on
 real Service Worker and Cache Storage APIs. Verify it by hand instead:
 
-1. `npm run build`, serve `out/` locally (e.g. `npx serve out`), open it in a
+1. `NEXT_PUBLIC_SITE_URL=https://qrforge.app npm run build` (or `npm run preview`,
+   which builds and serves `out/` on port 4000), open it in a
    browser, and confirm in DevTools → Application → Service Workers that a worker
    is **activated**, and under Cache Storage that a `qr-forge-<hash>` cache exists.
 2. Change something visible (e.g. the heading text in `app/page.js`), commit it

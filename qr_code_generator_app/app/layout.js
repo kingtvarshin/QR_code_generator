@@ -1,10 +1,11 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl = getSiteUrl();
 const title = "QR Forge — Free QR Code Generator";
 const description =
   "Generate QR codes for URLs, text, phone numbers, SMS, email, WiFi, and contact cards. Customize colors, size, and logo, then download as PNG, JPEG, or SVG. 100% in your browser — nothing is uploaded.";
