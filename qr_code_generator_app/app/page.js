@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import TypeSelector from "@/components/qr/TypeSelector";
 import QRPreview from "@/components/qr/QRPreview";
@@ -19,7 +19,13 @@ import { useHistory } from "@/lib/useHistory";
 import { byteLength, capacityForLevel, exceedsCapacity, isNonEmpty } from "@/lib/validators";
 import { downscaleImageDataUrl } from "@/lib/image";
 import { usePersistedOptions } from "@/lib/usePersistedOptions";
+import { useScanCheck } from "@/lib/useScanCheck";
 import { generateId } from "@/lib/id";
+
+// How long to wait after the last change before updating the single accessible
+// announcement — long enough that it doesn't fire mid-keystroke, and distinct
+// from the 300ms/600ms debounces above since it covers the scan-check result too.
+const ANNOUNCE_DEBOUNCE_MS = 800;
 
 export default function Home() {
   const [state, dispatch] = useQrBuilder();
@@ -74,6 +80,21 @@ export default function Home() {
   else if (tooLarge) {
     errorMessage = "This content is too large for the selected error-correction level. Try lowering it.";
   }
+
+  const scanResult = useScanCheck(debouncedEncoded, state.options, state.logo, isReady);
+
+  // One always-mounted live region (rendered unconditionally below) instead of
+  // several that mount/unmount with the QR or the scan badge — a screen reader
+  // often doesn't announce a brand-new live region that already has its text set
+  // when it's inserted, so errors were never announced and "QR code updated" only
+  // worked by accident. Debounced so it doesn't fire mid-keystroke.
+  const [announcement, setAnnouncement] = useState("");
+  useEffect(() => {
+    const scanLabel = scanResult ? (scanResult.ok ? "Scannable." : "May not scan.") : "";
+    const message = errorMessage ? `Error: ${errorMessage}` : isReady ? `QR code updated. ${scanLabel}`.trim() : "";
+    const timer = setTimeout(() => setAnnouncement(message), ANNOUNCE_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [errorMessage, isReady, scanResult]);
 
   const ActiveForm = formsByType[state.activeType];
 
@@ -153,6 +174,9 @@ export default function Home() {
         Generate, customize, and download QR codes for URLs, text, phone, SMS, email, WiFi,
         contact cards, WhatsApp, and UPI payments.
       </p>
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </p>
 
       <TypeSelector activeType={state.activeType} onChange={(typeId) => dispatch({ type: "SET_ACTIVE_TYPE", typeId })} />
 
@@ -185,7 +209,7 @@ export default function Home() {
           {isReady && activeTypeDef.preview && (
             <p className="text-sm font-medium text-slate-900">{activeTypeDef.preview(activeFields)}</p>
           )}
-          <ScanCheckBadge text={debouncedEncoded} options={state.options} logo={state.logo} isReady={isReady} />
+          <ScanCheckBadge result={scanResult} />
           <DownloadButtons
             text={debouncedEncoded}
             options={state.options}

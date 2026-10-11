@@ -54,10 +54,11 @@ function RenderedQrCode({ text, options, logo }) {
   );
 }
 
+// No aria-live region here — it would mount/unmount with the QR itself, and a
+// screen reader often doesn't announce a *new* live region that already has its
+// text set when it's inserted. page.js owns one always-mounted live region fed
+// from this same ready/error state instead.
 export default function QRPreview({ text, options, logo, isReady, errorMessage }) {
-  // No live-announced duplicate of errorMessage here — it's already exposed via
-  // the invalid field's own aria-describedby, so a screen reader user hears it
-  // once, when they reach that field, rather than twice on every keystroke.
   if (!isReady) {
     return <Placeholder>{errorMessage || "Fill in the form to generate a QR code."}</Placeholder>;
   }
@@ -68,9 +69,6 @@ export default function QRPreview({ text, options, logo, isReady, errorMessage }
       fallback={<Placeholder>This content is too large to encode. Try a lower error-correction level or shorter input.</Placeholder>}
     >
       <RenderedQrCode text={text} options={options} logo={logo} />
-      <p className="sr-only" aria-live="polite">
-        QR code updated
-      </p>
     </ErrorBoundary>
   );
 }
