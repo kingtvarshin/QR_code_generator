@@ -12,13 +12,15 @@ import { qrTypes } from "@/lib/qrTypes";
 import { useQrBuilder } from "@/lib/useQrBuilder";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { useHistory } from "@/lib/useHistory";
-import { exceedsCapacity, isNonEmpty } from "@/lib/validators";
+import { byteLength, capacityForLevel, exceedsCapacity, isNonEmpty } from "@/lib/validators";
 import { downscaleImageDataUrl } from "@/lib/image";
+import { usePersistedOptions } from "@/lib/usePersistedOptions";
 
 export default function Home() {
   const [state, dispatch] = useQrBuilder();
   const { history, addItem, removeItem, toggleFavorite, clearAll } = useHistory();
   const [historyError, setHistoryError] = useState(false);
+  usePersistedOptions(state.options, (options) => dispatch({ type: "MERGE_OPTIONS", options }));
 
   const activeTypeDef = qrTypes[state.activeType];
   const activeFields = state.fields[state.activeType];
@@ -28,6 +30,8 @@ export default function Home() {
   const debouncedEncoded = useDebouncedValue(rawEncoded, 300);
   const tooLarge = isValid && exceedsCapacity(debouncedEncoded, state.options.errorCorrectionLevel);
   const isReady = isValid && Boolean(debouncedEncoded) && !tooLarge;
+  const payloadBytes = byteLength(debouncedEncoded);
+  const capacityBytes = capacityForLevel(state.options.errorCorrectionLevel);
 
   // Only surface a field's error once the user has actually put something in it —
   // an empty required field is the default state, not a mistake worth flagging in red.
@@ -140,6 +144,10 @@ export default function Home() {
             disabled={!isReady}
             onDownload={handleDownloadLogged}
           />
+          <Typography variant="small" color={payloadBytes > capacityBytes ? "red" : "gray"}>
+            {payloadBytes.toLocaleString()} / {capacityBytes.toLocaleString()} bytes at{" "}
+            {state.options.errorCorrectionLevel}
+          </Typography>
         </div>
 
         <CustomizationPanel

@@ -37,3 +37,10 @@ export const LOW_CONTRAST_THRESHOLD = 4.5;
 export function hasLowContrast(colorDark, colorLight) {
   return contrastRatio(colorDark, colorLight) < LOW_CONTRAST_THRESHOLD;
 }
+
+// A QR scanner expects the "dark" modules to be the darker color. If the user swaps
+// them (lighter modules on a darker background), many scanners — especially older
+// ZXing-based Android readers — fail to decode it even when contrast itself is fine.
+export function hasInvertedColors(colorDark, colorLight) {
+  return relativeLuminance(colorDark) > relativeLuminance(colorLight);
+}

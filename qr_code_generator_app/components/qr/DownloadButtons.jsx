@@ -4,11 +4,11 @@ import { useState } from "react";
 import { Button } from "@material-tailwind/react";
 import { downloadPng, downloadJpeg, downloadSvg, buildFilename } from "@/lib/qrExport";
 
-const EXPORT_MIN_WIDTH = 512;
-
 export default function DownloadButtons({ text, options, logo, type, summary, disabled, onDownload }) {
   const [busy, setBusy] = useState(null);
-  const exportOptions = { ...options, width: Math.max(options.width, EXPORT_MIN_WIDTH) };
+  // `options.width` is the user's chosen download resolution (256-4096px) — the live
+  // preview renders separately at a fixed, smaller size regardless of this value.
+  const exportOptions = options;
 
   async function handleDownload(format, action) {
     setBusy(format);

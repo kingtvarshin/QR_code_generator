@@ -84,7 +84,14 @@ const EC_LEVEL_BYTE_CAPACITY = {
   H: 1273,
 };
 
+export function capacityForLevel(errorCorrectionLevel) {
+  return EC_LEVEL_BYTE_CAPACITY[errorCorrectionLevel] ?? EC_LEVEL_BYTE_CAPACITY.M;
+}
+
+export function byteLength(text) {
+  return new TextEncoder().encode(text || "").length;
+}
+
 export function exceedsCapacity(text, errorCorrectionLevel) {
-  const cap = EC_LEVEL_BYTE_CAPACITY[errorCorrectionLevel] ?? EC_LEVEL_BYTE_CAPACITY.M;
-  return new TextEncoder().encode(text).length > cap;
+  return byteLength(text) > capacityForLevel(errorCorrectionLevel);
 }

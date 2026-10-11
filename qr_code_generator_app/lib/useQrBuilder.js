@@ -6,7 +6,7 @@ import { getDefaultFieldsByType, qrTypeOrder } from "./qrTypes";
 export const defaultOptions = {
   errorCorrectionLevel: "M",
   margin: 4,
-  width: 240,
+  width: 512,
   colorDark: "#000000",
   colorLight: "#ffffff",
 };
@@ -39,6 +39,9 @@ function reducer(state, action) {
 
     case "SET_OPTION":
       return { ...state, options: { ...state.options, [action.key]: action.value } };
+
+    case "MERGE_OPTIONS":
+      return { ...state, options: { ...state.options, ...action.options } };
 
     case "SET_LOGO":
       return { ...state, logo: action.logo };

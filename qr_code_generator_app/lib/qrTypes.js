@@ -76,11 +76,11 @@ export const qrTypes = {
       return errors;
     },
     encode(fields) {
+      // SMSTO: (an Android convention, not a registered URI scheme) is read correctly
+      // by more scanners across iOS and Android than "sms:...?body=", which has had
+      // inconsistent "?" vs "&" handling across iOS versions.
       const phone = normalizePhoneDigits(fields.phone);
-      if (!isNonEmpty(fields.message)) return `sms:${phone}`;
-      // Some iOS versions expect "&body=" instead of "?body=" after a bare number;
-      // "?body=" is the documented/most broadly compatible form, used here deliberately.
-      return `sms:${phone}?body=${encodeURIComponent(fields.message)}`;
+      return `SMSTO:${phone}:${fields.message || ""}`;
     },
     summary(fields) {
       return fields.phone;

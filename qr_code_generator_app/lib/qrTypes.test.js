@@ -40,13 +40,13 @@ describe("phone", () => {
 });
 
 describe("sms", () => {
-  it("encodes phone only when there is no message", () => {
-    expect(qrTypes.sms.encode({ phone: "+15551234567", message: "" })).toBe("sms:+15551234567");
+  it("encodes as SMSTO:<phone>: with an empty message", () => {
+    expect(qrTypes.sms.encode({ phone: "+15551234567", message: "" })).toBe("SMSTO:+15551234567:");
   });
 
-  it("URL-encodes the message body", () => {
+  it("appends the message as plain text after the second colon", () => {
     expect(qrTypes.sms.encode({ phone: "+15551234567", message: "hi & bye" })).toBe(
-      "sms:+15551234567?body=hi%20%26%20bye"
+      "SMSTO:+15551234567:hi & bye"
     );
   });
 });

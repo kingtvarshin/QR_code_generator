@@ -6,6 +6,12 @@ import { Typography } from "@material-tailwind/react";
 import ErrorBoundary from "./ErrorBoundary";
 import { renderQrCanvas, toQrCodeOptions } from "@/lib/qrExport";
 
+// The "size" setting is really the download/export resolution (up to 4096px) — the
+// on-screen preview always renders at this fixed, modest resolution and is scaled to
+// fit its box with CSS, so picking a large export size doesn't make every keystroke
+// re-render a multi-megapixel canvas.
+const PREVIEW_WIDTH = 240;
+
 function Placeholder({ children }) {
   return (
     <div className="w-60 h-60 flex items-center justify-center text-center px-4">
@@ -25,7 +31,7 @@ function LogoCanvasPreview({ text, options, logo }) {
 
   useEffect(() => {
     let cancelled = false;
-    renderQrCanvas(text, options, logo).then((rendered) => {
+    renderQrCanvas(text, { ...options, width: PREVIEW_WIDTH }, logo).then((rendered) => {
       if (cancelled || !canvasRef.current) return;
       const target = canvasRef.current;
       target.width = rendered.width;
@@ -49,7 +55,7 @@ function RenderedQrCode({ text, options, logo }) {
 
   return (
     <div role="img" aria-label="QR code preview">
-      <SVG text={text} options={toQrCodeOptions(options)} />
+      <SVG text={text} options={toQrCodeOptions({ ...options, width: PREVIEW_WIDTH })} />
     </div>
   );
 }

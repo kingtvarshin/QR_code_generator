@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Select, Option, Typography, Alert, Button } from "@material-tailwind/react";
-import { hasLowContrast } from "@/lib/color";
+import { Select, Option, Typography, Alert } from "@material-tailwind/react";
+import { hasLowContrast, hasInvertedColors } from "@/lib/color";
+import LogoDropzone from "./LogoDropzone";
 
-const SIZE_OPTIONS = [128, 240, 256, 512, 1024];
+const SIZE_OPTIONS = [256, 512, 1024, 2048, 4096];
 const EC_LEVEL_OPTIONS = [
   { value: "L", label: "Low (L) — smallest, least recovery" },
   { value: "M", label: "Medium (M) — balanced default" },
@@ -13,23 +13,8 @@ const EC_LEVEL_OPTIONS = [
 ];
 
 export default function CustomizationPanel({ options, onOptionChange, logo, onLogoChange }) {
-  const fileInputRef = useRef(null);
   const lowContrast = hasLowContrast(options.colorDark, options.colorLight);
-
-  // Covers not just the "Remove logo" click below but also an external clear —
-  // e.g. restoring a history item that has no logo — so re-selecting the same
-  // file afterward still fires a change event instead of being a no-op.
-  useEffect(() => {
-    if (!logo && fileInputRef.current) fileInputRef.current.value = "";
-  }, [logo]);
-
-  function handleLogoFile(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => onLogoChange({ dataUrl: reader.result, widthRatio: 0.22 });
-    reader.readAsDataURL(file);
-  }
+  const inverted = hasInvertedColors(options.colorDark, options.colorLight);
 
   return (
     <div className="w-72 flex flex-col gap-4">
@@ -50,7 +35,7 @@ export default function CustomizationPanel({ options, onOptionChange, logo, onLo
       </Select>
 
       <Select
-        label="Size (px)"
+        label="Download size (px)"
         value={String(options.width)}
         onChange={(value) => onOptionChange("width", Number(value))}
       >
@@ -100,31 +85,13 @@ export default function CustomizationPanel({ options, onOptionChange, logo, onLo
           These colors are low contrast and may be hard for scanners to read.
         </Alert>
       )}
+      {!lowContrast && inverted && (
+        <Alert color="amber" variant="ghost">
+          Lighter modules on a darker background can fail to scan on some readers.
+        </Alert>
+      )}
 
-      <div>
-        <label htmlFor="logo" className="block mb-1 text-sm text-blue-gray-700">
-          Logo (optional)
-        </label>
-        <input
-          id="logo"
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/svg+xml,image/webp"
-          onChange={handleLogoFile}
-          className="text-sm"
-        />
-        {logo && (
-          <Button
-            size="sm"
-            variant="text"
-            color="red"
-            className="mt-1"
-            onClick={() => onLogoChange(null)}
-          >
-            Remove logo
-          </Button>
-        )}
-      </div>
+      <LogoDropzone logo={logo} onLogoChange={onLogoChange} />
     </div>
   );
 }

@@ -34,6 +34,7 @@ export default function WifiForm({ fields, errors, onFieldChange }) {
         onChange={(value) => onFieldChange("security", value)}
       >
         <Option value="WPA">WPA/WPA2</Option>
+        <Option value="SAE">WPA3 (SAE)</Option>
         <Option value="WEP">WEP</Option>
         <Option value="nopass">No password</Option>
       </Select>
