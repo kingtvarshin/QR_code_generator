@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 const siteUrl = getSiteUrl();
 const title = "QR Forge — Free QR Code Generator";
 const description =
-  "Generate QR codes for URLs, text, phone numbers, SMS, email, WiFi, and contact cards. Customize colors, size, and logo, then download as PNG, JPEG, or SVG. 100% in your browser — nothing is uploaded.";
+  "Generate QR codes for URLs, text, phone numbers, SMS, email, WiFi, contact cards, WhatsApp, and UPI payments. Customize colors, size, and logo, then download as PNG, JPEG, or SVG. 100% in your browser — nothing is uploaded.";
 
 export const metadata = {
   metadataBase: new URL(siteUrl),

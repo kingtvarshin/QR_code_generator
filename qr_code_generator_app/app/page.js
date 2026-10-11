@@ -142,8 +142,8 @@ export default function Home() {
     <main className="flex flex-col items-center gap-6 p-4 max-w-5xl mx-auto">
       <h1 className="mt-4 text-3xl font-semibold text-slate-900">QR Forge</h1>
       <p className="text-sm text-gray-600">
-        Generate, customize, and download QR codes for URLs, text, phone, SMS, email, WiFi, and
-        contact cards.
+        Generate, customize, and download QR codes for URLs, text, phone, SMS, email, WiFi,
+        contact cards, WhatsApp, and UPI payments.
       </p>
 
       <TypeSelector activeType={state.activeType} onChange={(typeId) => dispatch({ type: "SET_ACTIVE_TYPE", typeId })} />
@@ -177,6 +177,9 @@ export default function Home() {
               errorMessage={errorMessage}
             />
           </div>
+          {isReady && activeTypeDef.preview && (
+            <p className="text-sm font-medium text-slate-900">{activeTypeDef.preview(activeFields)}</p>
+          )}
           <ScanCheckBadge text={debouncedEncoded} options={state.options} logo={state.logo} isReady={isReady} />
           <DownloadButtons
             text={debouncedEncoded}

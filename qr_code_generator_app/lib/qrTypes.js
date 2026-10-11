@@ -248,6 +248,14 @@ export const qrTypes = {
     hint(fields) {
       return normalizeUpiAmount(fields.amount).warn ?? null;
     },
+    // A plain-language "Pay ₹499.50 to Jane Doe" line next to the QR — payers can
+    // catch a typo'd name/amount before scanning instead of after paying.
+    preview(fields) {
+      if (!isNonEmpty(fields.payeeName)) return null;
+      const { value: amount } = normalizeUpiAmount(fields.amount);
+      const payee = fields.payeeName.trim();
+      return isNonEmpty(amount) ? `Pay ₹${amount} to ${payee}` : `Pay to ${payee}`;
+    },
     summary(fields) {
       return fields.payeeName || fields.vpa;
     },

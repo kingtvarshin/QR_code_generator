@@ -235,4 +235,10 @@ describe("upi", () => {
     expect(qrTypes.upi.hint({ amount: "200000" })).toMatch(/1,00,000/);
     expect(qrTypes.upi.hint({ amount: "100" })).toBeNull();
   });
+
+  it("builds a plain-language preview line so a typo'd name/amount is visible before scanning", () => {
+    expect(qrTypes.upi.preview({ payeeName: "Jane Doe", amount: "499.5" })).toBe("Pay ₹499.50 to Jane Doe");
+    expect(qrTypes.upi.preview({ payeeName: "Jane Doe", amount: "" })).toBe("Pay to Jane Doe");
+    expect(qrTypes.upi.preview({ payeeName: "", amount: "100" })).toBeNull();
+  });
 });

@@ -12,7 +12,15 @@ const EC_LEVEL_OPTIONS = [
 ];
 
 const selectClassName =
-  "w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600";
+  "w-full min-h-11 border border-gray-300 rounded px-3 py-2 text-sm bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600";
+// Default range-input thumbs are ~12-16px — too small a hit area on touch. Sizing
+// the thumb via pseudo-elements needs appearance-none on both the track and thumb.
+const rangeClassName =
+  "w-full h-2 rounded-full bg-gray-200 appearance-none cursor-pointer " +
+  "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 " +
+  "[&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 " +
+  "[&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:rounded-full " +
+  "[&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:border-0";
 const labelClassName = "block mb-1 text-sm text-slate-700";
 
 export default function CustomizationPanel({ options, onOptionChange, logo, onLogoChange }) {
@@ -70,7 +78,7 @@ export default function CustomizationPanel({ options, onOptionChange, logo, onLo
           max={10}
           value={options.margin}
           onChange={(e) => onOptionChange("margin", Number(e.target.value))}
-          className="w-full block"
+          className={rangeClassName}
         />
       </div>
 
