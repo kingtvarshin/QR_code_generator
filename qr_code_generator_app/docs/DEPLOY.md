@@ -155,40 +155,17 @@ your-domain.com {
 ### Vercel (`vercel.json`)
 
 Next's own `headers()` config is ignored under `output: "export"` (confirmed via
-a build warning — there's no server to apply it at request time), so on Vercel
-this has to go in `vercel.json` instead, at the project root:
-
-```json
-{
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
-        },
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" }
-      ]
-    },
-    {
-      "source": "/_next/static/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
-    },
-    {
-      "source": "/sw.js",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
-    },
-    {
-      "source": "/",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
-    }
-  ]
-}
-```
-
+a build warning — there's no server to apply it at request time), so the
+project's own `vercel.json` carries the same headers instead, plus
+`"buildCommand": "npm run build:deploy"` (so a real deploy gets the
+localhost-NEXT_PUBLIC_SITE_URL guard from above) and `"outputDirectory": "out"`.
 Vercel merges headers from every matching rule rather than requiring the common
-ones to be repeated per-path, unlike nginx above.
+ones to be repeated per-path, unlike nginx above — keep `vercel.json` in sync
+with `public/_headers` if either changes.
+
+Vercel auto-detects the Next.js framework and otherwise needs no project-level
+config beyond what's in `vercel.json`, **except**: if the Vercel project's
+repository root isn't this directory (e.g. this app lives in a subdirectory of
+a monorepo), set the project's **Root Directory** to this folder in the Vercel
+dashboard — `vercel.json`'s `outputDirectory`/`buildCommand` are relative to
+that setting, not the git repo root.
