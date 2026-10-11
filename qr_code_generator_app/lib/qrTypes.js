@@ -9,6 +9,7 @@ import {
   looksLikeUrl,
   normalizePhoneDigits,
   normalizeUrl,
+  normalizeWhatsAppNumber,
   toTelUri,
 } from "./validators";
 
@@ -193,15 +194,21 @@ export const qrTypes = {
     validate(fields) {
       const errors = {};
       if (!isNonEmpty(fields.phone)) errors.phone = "Enter a phone number with country code.";
-      else if (!isValidPhone(fields.phone)) errors.phone = "Enter a valid phone number.";
+      else {
+        const { error } = normalizeWhatsAppNumber(fields.phone);
+        if (error) errors.phone = error;
+      }
       return errors;
     },
     encode(fields) {
-      // wa.me takes bare digits (no "+", no formatting) — the leading country
-      // code is still required, just not visually marked in the output.
-      const digits = normalizePhoneDigits(fields.phone).replace("+", "");
+      const { digits } = normalizeWhatsAppNumber(fields.phone);
       const query = isNonEmpty(fields.message) ? `?text=${encodeURIComponent(fields.message)}` : "";
       return `https://wa.me/${digits}${query}`;
+    },
+    hint(fields) {
+      if (!isNonEmpty(fields.phone)) return null;
+      const { assumedCc } = normalizeWhatsAppNumber(fields.phone);
+      return assumedCc ? "Assuming India (+91) — add a + and country code if that's not right." : null;
     },
     summary(fields) {
       return fields.phone;

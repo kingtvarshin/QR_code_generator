@@ -125,7 +125,12 @@ export default function Home() {
 
       <div className="flex flex-wrap justify-center gap-8 w-full">
         <div role="tabpanel" id="qr-form-panel" aria-labelledby={`tab-${state.activeType}`}>
-          <ActiveForm fields={activeFields} errors={displayErrors} onFieldChange={handleFieldChange} />
+          <ActiveForm
+            fields={activeFields}
+            errors={displayErrors}
+            onFieldChange={handleFieldChange}
+            hint={activeTypeDef.hint?.(activeFields)}
+          />
         </div>
 
         <div className="flex flex-col items-center gap-3">

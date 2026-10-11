@@ -63,6 +63,22 @@ export function isValidPhone(value) {
   return digitCount >= 7 && digitCount <= 15;
 }
 
+// wa.me takes bare digits including the country code — no "+", no leading 00,
+// no formatting. A 10-digit number with no code is ambiguous (e.g. a number
+// starting "98" reads as Iran's country code to WhatsApp, not a bare Indian
+// number), so it's treated as India (+91) by default and flagged via `assumedCc`
+// rather than silently sent to the wrong country.
+export function normalizeWhatsAppNumber(value = "", defaultCc = "91") {
+  let v = value.trim().replace(/[\s().-]/g, "");
+  if (v.startsWith("00")) v = `+${v.slice(2)}`;
+  const hasCc = v.startsWith("+");
+  const digits = v.replace(/\D/g, "");
+  if (!hasCc && digits.length === 10) return { digits: `${defaultCc}${digits}`, assumedCc: true };
+  if (!hasCc) return { digits, error: "Add the country code, e.g. +91 98765 43210" };
+  if (digits.length < 8 || digits.length > 15) return { digits, error: "Enter a valid phone number." };
+  return { digits, assumedCc: false };
+}
+
 const UPI_VPA_RE = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
 
 export function isValidUpiVpa(value) {

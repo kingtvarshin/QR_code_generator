@@ -9,6 +9,7 @@ import {
   looksLikeUrl,
   normalizePhoneDigits,
   normalizeUrl,
+  normalizeWhatsAppNumber,
   parsePhone,
   toTelUri,
 } from "./validators";
@@ -94,6 +95,33 @@ describe("escapeWifiField", () => {
 
   it("escapes semicolons, commas, quotes, and colons", () => {
     expect(escapeWifiField('a;b,c"d:e')).toBe('a\\;b\\,c\\"d\\:e');
+  });
+});
+
+describe("normalizeWhatsAppNumber", () => {
+  it("assumes India (+91) for a bare 10-digit number and flags it", () => {
+    expect(normalizeWhatsAppNumber("98765 43210")).toEqual({ digits: "919876543210", assumedCc: true });
+  });
+
+  it("keeps an explicit country code as-is", () => {
+    expect(normalizeWhatsAppNumber("+91 98765-43210")).toEqual({ digits: "919876543210", assumedCc: false });
+  });
+
+  it("treats a leading 00 as a + country-code prefix", () => {
+    expect(normalizeWhatsAppNumber("0091 98765 43210")).toEqual({ digits: "919876543210", assumedCc: false });
+  });
+
+  it("keeps a non-Indian country code untouched", () => {
+    expect(normalizeWhatsAppNumber("+1 (415) 555-0100")).toEqual({ digits: "14155550100", assumedCc: false });
+  });
+
+  it("requires a country code when the digit count isn't exactly 10", () => {
+    expect(normalizeWhatsAppNumber("5551234")).toHaveProperty("error");
+  });
+
+  it("rejects a number that's too short or too long even with a country code", () => {
+    expect(normalizeWhatsAppNumber("+1234")).toHaveProperty("error");
+    expect(normalizeWhatsAppNumber("+1234567890123456")).toHaveProperty("error");
   });
 });
 

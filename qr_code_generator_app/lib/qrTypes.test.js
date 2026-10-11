@@ -156,10 +156,27 @@ describe("whatsapp", () => {
     );
   });
 
+  it("assumes India (+91) for a bare 10-digit number instead of misreading the first digits as a different country code", () => {
+    expect(qrTypes.whatsapp.encode({ phone: "98765 43210", message: "" })).toBe("https://wa.me/919876543210");
+  });
+
+  it("treats a leading 00 as a + country-code prefix", () => {
+    expect(qrTypes.whatsapp.encode({ phone: "0091 98765 43210", message: "" })).toBe(
+      "https://wa.me/919876543210"
+    );
+  });
+
   it("requires a phone number", () => {
     expect(qrTypes.whatsapp.validate({ phone: "" })).toHaveProperty("phone");
     expect(qrTypes.whatsapp.validate({ phone: "123" })).toHaveProperty("phone");
     expect(qrTypes.whatsapp.validate({ phone: "+15551234567" })).not.toHaveProperty("phone");
+    expect(qrTypes.whatsapp.validate({ phone: "98765 43210" })).not.toHaveProperty("phone");
+  });
+
+  it("hints that a country code was assumed, only when one was", () => {
+    expect(qrTypes.whatsapp.hint({ phone: "98765 43210" })).toMatch(/India/);
+    expect(qrTypes.whatsapp.hint({ phone: "+15551234567" })).toBeNull();
+    expect(qrTypes.whatsapp.hint({ phone: "" })).toBeNull();
   });
 });
 

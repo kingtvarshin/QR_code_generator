@@ -3,7 +3,7 @@
 import FieldError from "./FieldError";
 import { inputClass, labelClass } from "./styles";
 
-export default function WhatsAppForm({ fields, errors, onFieldChange }) {
+export default function WhatsAppForm({ fields, errors, onFieldChange, hint }) {
   return (
     <div className="w-72 flex flex-col gap-3">
       <div>
@@ -15,7 +15,7 @@ export default function WhatsAppForm({ fields, errors, onFieldChange }) {
           className={inputClass(Boolean(errors.phone))}
           value={fields.phone}
           aria-invalid={Boolean(errors.phone)}
-          aria-describedby={errors.phone ? "whatsapp-phone-error" : undefined}
+          aria-describedby={errors.phone ? "whatsapp-phone-error" : hint ? "whatsapp-phone-hint" : undefined}
           onChange={(e) => onFieldChange("phone", e.target.value)}
           placeholder="+1 555 123 4567"
           type="tel"
@@ -23,6 +23,11 @@ export default function WhatsAppForm({ fields, errors, onFieldChange }) {
           autoComplete="tel"
         />
         <FieldError id="whatsapp-phone-error" message={errors.phone} />
+        {!errors.phone && hint && (
+          <p id="whatsapp-phone-hint" className="mt-1 text-sm text-gray-500">
+            {hint}
+          </p>
+        )}
       </div>
       <div>
         <label htmlFor="whatsapp-message" className={labelClass}>
