@@ -74,8 +74,16 @@ export default function MiniPreview({ previewRef, formRef, text, options, isRead
   if (!isReady || mainVisible || formFocused || keyboardLikelyOpen) return null;
 
   const status = scanStatusLabel(scanResult);
-  const statusColor = scanResult ? (scanResult.ok ? "text-green-700" : "text-amber-700") : "text-slate-700";
-  const statusText = status ? `${scanResult.ok ? "✓" : "⚠"} ${status}` : "QR ready";
+  let statusColor = "text-slate-700";
+  let statusIcon = "";
+  if (scanResult?.ok === true) {
+    statusColor = "text-green-700";
+    statusIcon = "✓ ";
+  } else if (scanResult?.ok === false) {
+    statusColor = "text-amber-700";
+    statusIcon = "⚠ ";
+  }
+  const statusText = status ? `${statusIcon}${status}` : "QR ready";
 
   return (
     <button

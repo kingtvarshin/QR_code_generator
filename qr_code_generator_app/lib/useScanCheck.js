@@ -48,7 +48,10 @@ export function useScanCheck(text, options, logo, isReady) {
 
 // Shared short label for the scan-check result, so page.js's live announcement
 // and MiniPreview's status text can't drift out of sync with each other.
+// `ok: null` (checkScannable couldn't run at all, e.g. the jsQR chunk failed to
+// load) gets its own neutral label, distinct from an actual pass/fail.
 export function scanStatusLabel(result) {
   if (!result) return null;
+  if (result.ok === null) return "Scan check unavailable";
   return result.ok ? "Scannable" : "May not scan";
 }

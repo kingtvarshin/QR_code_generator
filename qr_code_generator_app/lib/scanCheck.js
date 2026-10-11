@@ -42,7 +42,10 @@ async function detectWithJsQr(canvas) {
 
 // Returns null when there's nothing to check, or { ok, reason } where `reason`
 // explains *why* it isn't scannable so the UI can give cause-specific advice
-// instead of one generic warning.
+// instead of one generic warning. `ok: null` is a distinct third state — the
+// check itself couldn't run (e.g. the jsQR chunk failed to load), which is not
+// the same as "nothing to check" (ok/reason both absent would look identical to
+// the caller otherwise) or an actual scan failure.
 export async function checkScannable(text, options, logo) {
   if (!text) return null;
 
@@ -50,7 +53,18 @@ export async function checkScannable(text, options, logo) {
   const canvas = await renderQrCanvas(text, { ...options, width }, logo);
 
   const viaDetector = await detectWithBarcodeDetector(canvas);
-  const decoded = viaDetector !== undefined ? viaDetector : await detectWithJsQr(canvas);
+  let decoded;
+  if (viaDetector !== undefined) {
+    decoded = viaDetector;
+  } else {
+    try {
+      decoded = await detectWithJsQr(canvas);
+    } catch {
+      // Precached in production, but the dynamic import() can still fail — a
+      // cleared/evicted cache, a dev server that was stopped, storage disabled.
+      return { ok: null, reason: "unavailable" };
+    }
+  }
 
   // "Found *a* code" isn't enough — compare the decoded payload against what we
   // actually encoded, otherwise a code that decodes to garbage still reads as OK.

@@ -20,14 +20,23 @@ if `NEXT_PUBLIC_SITE_URL` resolves to `localhost` or `127.0.0.1`.
 
 ## Verifying a redeploy is actually picked up (service worker)
 
-`public/sw.template.js` is turned into `public/sw.js` by `scripts/prebuild.mjs`
-(runs automatically as npm's `prebuild` hook before every `npm run build`), which
+`public/sw.template.js` is turned into `public/sw.js` by `scripts/postbuild.mjs`
+(runs automatically as npm's `postbuild` hook after every `npm run build`), which
 stamps the cache name with the current git commit (`qr-forge-<short-hash>`, or a
-timestamp if git isn't available). `scripts/stampServiceWorker.test.mjs` covers
-the stamping logic itself — that two different versions produce two different
-cache names — but the full browser lifecycle (install → waiting → the update
-toast → reload) isn't something jsdom/vitest can exercise, since it depends on
-real Service Worker and Cache Storage APIs. Verify it by hand instead:
+timestamp if git isn't available) and the list of hashed `/_next/static/chunks/*`
+files to precache — including chunks only ever reached via a runtime dynamic
+`import()`, like the scan-check feature's jsQR chunk, so they're available
+offline on first visit rather than only after they happen to get fetched once
+online. This has to run *after* the build, not before: those hashed filenames
+don't exist until `next build` has produced them. The static export's own
+public/-into-out/ copy already ran by then, so this script copies the
+freshly-stamped `sw.js` into `out/` itself afterward.
+
+`scripts/stampServiceWorker.test.mjs` covers the stamping logic itself — that two
+different versions produce two different cache names, and that the precache list
+is embedded correctly — but the full browser lifecycle (install → waiting → the
+update toast → reload) isn't something jsdom/vitest can exercise, since it
+depends on real Service Worker and Cache Storage APIs. Verify it by hand instead:
 
 1. `NEXT_PUBLIC_SITE_URL=https://qrforge.app npm run build` (or `npm run preview`,
    which builds and serves `out/` on port 4000), open it in a
@@ -47,6 +56,13 @@ real Service Worker and Cache Storage APIs. Verify it by hand instead:
    on `activate`) and only the new one remains.
 6. Sanity check offline support: DevTools → Network → set to "Offline", reload —
    the page should still load from cache (served by the now-activated worker).
+   Generate a URL code and confirm the scan-check badge still shows "✓ Scannable"
+   — that exercises the jsQR chunk, which is only reachable via a runtime dynamic
+   import() and has to be in the precache list (not just the chunks referenced
+   directly from the page) for this to work offline. The console should show no
+   uncaught errors from `sw.js` — a cross-origin/unsupported-scheme request (e.g.
+   from an installed browser extension) or a genuinely offline fetch should fail
+   silently from the worker's own perspective, not as an unhandled rejection.
 
 If step 4 never shows the toast, check that `navigator.serviceWorker.controller`
 was actually set on the *first* load (it's intentionally `null` on a true first

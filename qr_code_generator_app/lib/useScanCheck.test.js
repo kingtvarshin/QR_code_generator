@@ -14,4 +14,8 @@ describe("scanStatusLabel", () => {
     expect(scanStatusLabel({ ok: false, reason: "inverted" })).toBe("May not scan");
     expect(scanStatusLabel({ ok: false, reason: "logo" })).toBe("May not scan");
   });
+
+  it("labels an unavailable check (ok: null) distinctly from either an actual pass or fail", () => {
+    expect(scanStatusLabel({ ok: null, reason: "unavailable" })).toBe("Scan check unavailable");
+  });
 });

@@ -13,8 +13,13 @@ vi.mock("./qrExport", () => ({
   })),
 }));
 
+const REJECT_JSQR = Symbol("reject-jsqr");
+
 vi.mock("jsqr", () => ({
-  default: vi.fn(() => (mockDecoded === null ? null : { data: mockDecoded })),
+  default: vi.fn(() => {
+    if (mockDecoded === REJECT_JSQR) throw new Error("chunk failed to load");
+    return mockDecoded === null ? null : { data: mockDecoded };
+  }),
 }));
 
 const { renderQrCanvas } = await import("./qrExport");
@@ -66,5 +71,11 @@ describe("checkScannable", () => {
     mockDecoded = null;
     const result = await checkScannable("hello", baseOptions);
     expect(result).toEqual({ ok: false, reason: "unreadable" });
+  });
+
+  it("reports ok: null, reason: unavailable when jsQR itself fails to load/run, instead of throwing or looking like a scan failure", async () => {
+    mockDecoded = REJECT_JSQR;
+    const result = await checkScannable("hello", baseOptions);
+    expect(result).toEqual({ ok: null, reason: "unavailable" });
   });
 });

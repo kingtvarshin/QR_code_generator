@@ -12,6 +12,13 @@ const WARNING_BY_REASON = {
 export default function ScanCheckBadge({ result }) {
   if (!result) return null;
 
+  // ok: null means the check itself couldn't run (e.g. the jsQR chunk failed to
+  // load) — distinct from an actual pass or fail, so it gets a neutral message
+  // rather than silently disappearing or reading as a scan failure.
+  if (result.ok === null) {
+    return <p className="text-sm text-gray-500">Scan check unavailable offline.</p>;
+  }
+
   return (
     <p className={`text-sm ${result.ok ? "text-green-700" : "text-amber-700"}`}>
       {result.ok ? "✓ Scannable" : WARNING_BY_REASON[result.reason] ?? WARNING_BY_REASON.unreadable}
