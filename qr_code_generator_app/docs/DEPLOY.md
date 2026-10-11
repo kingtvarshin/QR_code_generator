@@ -12,6 +12,12 @@ canonical link, Open Graph/Twitter image URLs, and the sitemap/robots `<loc>`
 values (`lib/siteUrl.js`). Without it, the build fails on purpose rather than
 silently shipping those pointing at `http://localhost:3000`.
 
+That check only catches the var being *unset* — it wouldn't catch a real deploy
+accidentally running with a `localhost`/`127.0.0.1` value left over from a local
+`npm run preview`. **Use `npm run build:deploy` for actual deployments** (CI,
+hosting build command): it's the same build, but additionally refuses to proceed
+if `NEXT_PUBLIC_SITE_URL` resolves to `localhost` or `127.0.0.1`.
+
 ## Verifying a redeploy is actually picked up (service worker)
 
 `public/sw.template.js` is turned into `public/sw.js` by `scripts/prebuild.mjs`

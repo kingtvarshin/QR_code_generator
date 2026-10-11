@@ -32,6 +32,10 @@ Open [http://localhost:3000](http://localhost:3000).
   Requires `NEXT_PUBLIC_SITE_URL` (e.g. `https://qrforge.app`) to be set — the
   build fails on purpose otherwise, rather than shipping canonical/OG/sitemap
   URLs pointing at `localhost` (see `docs/DEPLOY.md`).
+- `npm run build:deploy` — the real deployment build (use this one in CI/hosting
+  config, not plain `npm run build`): also refuses to proceed if
+  `NEXT_PUBLIC_SITE_URL` resolves to `localhost`/`127.0.0.1`, which plain
+  `npm run build` wouldn't catch if a preview value leaked into the deploy env.
 - `npm run preview` — build, then serve the static export at
   [http://localhost:4000](http://localhost:4000) via `serve`, on a different port
   than `npm run dev` so the two don't fight over the same service worker. Unlike

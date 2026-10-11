@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/prebuild.mjs",
     "build": "next build",
+    "build:deploy": "node scripts/buildDeploy.mjs",
     "start": "next start",
     "preview": "node scripts/preview.mjs",
     "lint": "eslint . && npm run lint:classes",
