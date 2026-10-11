@@ -9,25 +9,30 @@ import { checkScannable } from "@/lib/scanCheck";
 // this keeps rapid slider drags (margin, colors) from queuing up a decode per tick.
 const CHECK_DEBOUNCE_MS = 500;
 
+const WARNING_BY_REASON = {
+  logo: "⚠ May not scan — the logo covers too much of the code. Make it smaller.",
+  inverted: "⚠ Inverted colors — many phone scanners can't read this. Swap the foreground/background colors.",
+  unreadable: "⚠ May not scan — try more contrast or shorten the content.",
+};
+
 export default function ScanCheckBadge({ text, options, logo, isReady }) {
   const checkKey = isReady ? `${text}::${JSON.stringify(options)}::${logo?.dataUrl?.length ?? 0}` : "";
   const debouncedKey = useDebouncedValue(checkKey, CHECK_DEBOUNCE_MS);
-  const [status, setStatus] = useState("idle"); // idle | checking | ok | warn
+  const [result, setResult] = useState(undefined); // undefined | null | { ok, reason }
 
   useEffect(() => {
     let cancelled = false;
 
     async function run() {
       if (!debouncedKey) {
-        if (!cancelled) setStatus("idle");
+        if (!cancelled) setResult(undefined);
         return;
       }
-      if (!cancelled) setStatus("checking");
       try {
-        const result = await checkScannable(text, options, logo);
-        if (!cancelled) setStatus(result === null ? "idle" : result ? "ok" : "warn");
+        const outcome = await checkScannable(text, options, logo);
+        if (!cancelled) setResult(outcome);
       } catch {
-        if (!cancelled) setStatus("idle");
+        if (!cancelled) setResult(undefined);
       }
     }
 
@@ -41,11 +46,11 @@ export default function ScanCheckBadge({ text, options, logo, isReady }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedKey]);
 
-  if (status === "idle" || status === "checking") return null;
+  if (!result) return null;
 
   return (
-    <p role="status" className={`text-sm ${status === "ok" ? "text-green-700" : "text-amber-700"}`}>
-      {status === "ok" ? "✓ Scannable" : "⚠ May not scan — try higher error correction / more contrast / smaller logo"}
+    <p role="status" className={`text-sm ${result.ok ? "text-green-700" : "text-amber-700"}`}>
+      {result.ok ? "✓ Scannable" : WARNING_BY_REASON[result.reason] ?? WARNING_BY_REASON.unreadable}
     </p>
   );
 }
