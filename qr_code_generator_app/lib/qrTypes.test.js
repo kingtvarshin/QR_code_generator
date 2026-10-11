@@ -230,6 +230,12 @@ describe("upi", () => {
     );
   });
 
+  it("lowercases the VPA, since it's case-insensitive and inputs often get auto-capitalized", () => {
+    expect(qrTypes.upi.encode({ vpa: "Shop@OkAxis", payeeName: "Jane", amount: "", note: "" })).toBe(
+      "upi://pay?pa=shop@okaxis&pn=Jane&cu=INR"
+    );
+  });
+
   it("warns above the UPI soft limit via hint() instead of rejecting the amount", () => {
     expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", amount: "200000" })).not.toHaveProperty("amount");
     expect(qrTypes.upi.hint({ amount: "200000" })).toMatch(/1,00,000/);
@@ -240,5 +246,11 @@ describe("upi", () => {
     expect(qrTypes.upi.preview({ payeeName: "Jane Doe", amount: "499.5" })).toBe("Pay ₹499.50 to Jane Doe");
     expect(qrTypes.upi.preview({ payeeName: "Jane Doe", amount: "" })).toBe("Pay to Jane Doe");
     expect(qrTypes.upi.preview({ payeeName: "", amount: "100" })).toBeNull();
+  });
+
+  it("formats the preview amount with Indian digit grouping, not a plain 6-digit string", () => {
+    expect(qrTypes.upi.preview({ payeeName: "Vikrant T & Co", amount: "150000" })).toBe(
+      "Pay ₹1,50,000.00 to Vikrant T & Co"
+    );
   });
 });

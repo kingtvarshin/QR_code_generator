@@ -238,7 +238,10 @@ export const qrTypes = {
     encode(fields) {
       // Params left out entirely when empty, rather than sent as pa=&pn=&... —
       // some UPI apps choke on empty query values instead of ignoring them.
-      const params = [`pa=${fields.vpa.trim()}`, `pn=${encodeURIComponent(fields.payeeName.trim())}`];
+      // VPAs are case-insensitive; lowercasing keeps the encoded payload consistent
+      // regardless of how the user capitalized it (phones also auto-capitalize the
+      // first letter of a text input by default).
+      const params = [`pa=${fields.vpa.trim().toLowerCase()}`, `pn=${encodeURIComponent(fields.payeeName.trim())}`];
       const { value: amount } = normalizeUpiAmount(fields.amount);
       if (isNonEmpty(amount)) params.push(`am=${amount}`);
       params.push("cu=INR");
@@ -248,13 +251,15 @@ export const qrTypes = {
     hint(fields) {
       return normalizeUpiAmount(fields.amount).warn ?? null;
     },
-    // A plain-language "Pay ₹499.50 to Jane Doe" line next to the QR — payers can
-    // catch a typo'd name/amount before scanning instead of after paying.
+    // A plain-language "Pay ₹1,50,000.00 to Jane Doe" line next to the QR — payers
+    // can catch a typo'd name/amount before scanning instead of after paying.
     preview(fields) {
       if (!isNonEmpty(fields.payeeName)) return null;
       const { value: amount } = normalizeUpiAmount(fields.amount);
       const payee = fields.payeeName.trim();
-      return isNonEmpty(amount) ? `Pay ₹${amount} to ${payee}` : `Pay to ${payee}`;
+      if (!isNonEmpty(amount)) return `Pay to ${payee}`;
+      const formatted = Number(amount).toLocaleString("en-IN", { style: "currency", currency: "INR" });
+      return `Pay ${formatted} to ${payee}`;
     },
     summary(fields) {
       return fields.payeeName || fields.vpa;
