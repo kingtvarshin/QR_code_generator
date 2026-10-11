@@ -6,6 +6,7 @@ export default function ServiceWorkerRegistration() {
   const [waitingWorker, setWaitingWorker] = useState(null);
 
   useEffect(() => {
+    if (process.env.NODE_ENV !== "production") return;
     if (!("serviceWorker" in navigator)) return;
 
     let registration;
