@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   LinkIcon,
   DocumentTextIcon,
@@ -29,6 +29,19 @@ const iconsByType = {
 export default function TypeSelector({ activeType, onChange }) {
   const buttonRefs = useRef([]);
 
+  // The strip scrolls horizontally below `sm`, so picking a tab further along the
+  // list (e.g. UPI) can otherwise leave the visible slice showing earlier tabs with
+  // no on-screen indication of which one is actually active.
+  useEffect(() => {
+    const activeIndex = qrTypeOrder.indexOf(activeType);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    buttonRefs.current[activeIndex]?.scrollIntoView({
+      block: "nearest",
+      inline: "center",
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+  }, [activeType]);
+
   function handleKeyDown(event, index) {
     const direction = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
     if (event.key !== "Home" && event.key !== "End" && !direction) return;
@@ -50,7 +63,8 @@ export default function TypeSelector({ activeType, onChange }) {
     <div
       role="tablist"
       aria-label="QR code type"
-      className="flex gap-1 overflow-x-auto [scrollbar-width:none] -mx-4 px-4 w-full sm:w-auto sm:mx-0 sm:justify-center sm:flex-wrap"
+      className="flex gap-1 overflow-x-auto [scrollbar-width:none] -mx-4 px-4 w-full sm:w-auto sm:mx-0 sm:justify-center sm:flex-wrap
+        [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] sm:[mask-image:none]"
     >
       {qrTypeOrder.map((typeId, index) => {
         const Icon = iconsByType[typeId];
