@@ -141,6 +141,11 @@ describe("vcard", () => {
     const encoded = qrTypes.vcard.encode({ firstName: "Ada", lastName: "", org: "Acme, Inc.; R&D" });
     expect(encoded).toContain("ORG:Acme\\, Inc.\\; R&D");
   });
+
+  it("keeps a trailing extension instead of silently dropping it", () => {
+    const encoded = qrTypes.vcard.encode({ firstName: "Ada", lastName: "", phone: "+91 98765 43210 x12" });
+    expect(encoded).toContain("TEL;TYPE=CELL:+919876543210;ext=12");
+  });
 });
 
 describe("whatsapp", () => {
@@ -217,5 +222,17 @@ describe("upi", () => {
     expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", note: "x".repeat(80) })).not.toHaveProperty(
       "note"
     );
+  });
+
+  it("strips commas typed in Indian number grouping and formats to 2 decimals", () => {
+    expect(qrTypes.upi.encode({ vpa: "name@bank", payeeName: "Jane", amount: "1,000", note: "" })).toBe(
+      "upi://pay?pa=name@bank&pn=Jane&am=1000.00&cu=INR"
+    );
+  });
+
+  it("warns above the UPI soft limit via hint() instead of rejecting the amount", () => {
+    expect(qrTypes.upi.validate({ vpa: "a@b", payeeName: "x", amount: "200000" })).not.toHaveProperty("amount");
+    expect(qrTypes.upi.hint({ amount: "200000" })).toMatch(/1,00,000/);
+    expect(qrTypes.upi.hint({ amount: "100" })).toBeNull();
   });
 });

@@ -8,8 +8,10 @@ import {
   isValidUpiVpa,
   looksLikeUrl,
   normalizePhoneDigits,
+  normalizeUpiAmount,
   normalizeUrl,
   normalizeWhatsAppNumber,
+  parsePhone,
   toTelUri,
 } from "./validators";
 
@@ -175,7 +177,10 @@ export const qrTypes = {
       lines.push(`FN:${esc(fullName)}`);
       if (isNonEmpty(fields.org)) lines.push(`ORG:${esc(fields.org)}`);
       if (isNonEmpty(fields.title)) lines.push(`TITLE:${esc(fields.title)}`);
-      if (isNonEmpty(fields.phone)) lines.push(`TEL;TYPE=CELL:${normalizePhoneDigits(fields.phone) || fields.phone}`);
+      if (isNonEmpty(fields.phone)) {
+        const { number, ext } = parsePhone(fields.phone);
+        lines.push(`TEL;TYPE=CELL:${number || fields.phone}${ext ? `;ext=${ext}` : ""}`);
+      }
       if (isNonEmpty(fields.email)) lines.push(`EMAIL;TYPE=INTERNET:${fields.email.trim()}`);
       if (isNonEmpty(fields.url)) lines.push(`URL:${normalizeUrl(fields.url)}`);
       if (isNonEmpty(fields.address)) lines.push(`ADR;TYPE=WORK:;;${esc(fields.address)};;;;`);
@@ -234,10 +239,14 @@ export const qrTypes = {
       // Params left out entirely when empty, rather than sent as pa=&pn=&... —
       // some UPI apps choke on empty query values instead of ignoring them.
       const params = [`pa=${fields.vpa.trim()}`, `pn=${encodeURIComponent(fields.payeeName.trim())}`];
-      if (isNonEmpty(fields.amount)) params.push(`am=${fields.amount.trim()}`);
+      const { value: amount } = normalizeUpiAmount(fields.amount);
+      if (isNonEmpty(amount)) params.push(`am=${amount}`);
       params.push("cu=INR");
       if (isNonEmpty(fields.note)) params.push(`tn=${encodeURIComponent(fields.note.trim())}`);
       return `upi://pay?${params.join("&")}`;
+    },
+    hint(fields) {
+      return normalizeUpiAmount(fields.amount).warn ?? null;
     },
     summary(fields) {
       return fields.payeeName || fields.vpa;

@@ -8,6 +8,7 @@ import {
   isValidUpiVpa,
   looksLikeUrl,
   normalizePhoneDigits,
+  normalizeUpiAmount,
   normalizeUrl,
   normalizeWhatsAppNumber,
   parsePhone,
@@ -152,6 +153,32 @@ describe("isValidUpiAmount", () => {
     expect(isValidUpiAmount("0")).toBe(false);
     expect(isValidUpiAmount("-5")).toBe(false);
     expect(isValidUpiAmount("10.999")).toBe(false);
+  });
+
+  it("accepts commas, the ₹ symbol, and spaces the way people actually type amounts", () => {
+    expect(isValidUpiAmount("1,000")).toBe(true);
+    expect(isValidUpiAmount("1,00,000")).toBe(true);
+    expect(isValidUpiAmount("₹ 499.50")).toBe(true);
+  });
+});
+
+describe("normalizeUpiAmount", () => {
+  it("formats a valid amount to 2 decimals", () => {
+    expect(normalizeUpiAmount("499.5")).toEqual({ value: "499.50", warn: null });
+    expect(normalizeUpiAmount("100")).toEqual({ value: "100.00", warn: null });
+  });
+
+  it("strips commas/₹/spaces before formatting", () => {
+    expect(normalizeUpiAmount("1,00,000")).toEqual({ value: "100000.00", warn: null });
+  });
+
+  it("warns above the UPI soft limit instead of rejecting the amount", () => {
+    expect(normalizeUpiAmount("200000")).toEqual({ value: "200000.00", warn: expect.stringContaining("1,00,000") });
+  });
+
+  it("returns an empty value for empty or invalid input", () => {
+    expect(normalizeUpiAmount("")).toEqual({ value: "" });
+    expect(normalizeUpiAmount("-5")).toEqual({ value: "" });
   });
 });
 

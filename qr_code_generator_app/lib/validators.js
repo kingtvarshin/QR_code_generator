@@ -87,12 +87,39 @@ export function isValidUpiVpa(value) {
 
 const UPI_AMOUNT_RE = /^\d+(\.\d{1,2})?$/;
 
+// NPCI's default per-transaction limit for P2P UPI transfers — amounts above this
+// still encode (many apps/banks enforce their own real limit), but get a
+// non-blocking warning rather than being silently sent as-is.
+export const UPI_SOFT_LIMIT = 100000;
+
+// Strips thousands separators and the ₹ symbol people commonly type (e.g.
+// "1,00,000" or "₹499.50") before validating/encoding, so amounts typed the way
+// Indians actually type them aren't rejected.
+function cleanUpiAmountInput(value) {
+  return (value || "").replace(/[,\s₹]/g, "");
+}
+
 // Amount is optional — an empty value is valid (just omitted from the encoded
 // URI); when present it must be a positive number with at most 2 decimals.
 export function isValidUpiAmount(value) {
   if (!isNonEmpty(value)) return true;
-  const trimmed = value.trim();
-  return UPI_AMOUNT_RE.test(trimmed) && Number(trimmed) > 0;
+  const clean = cleanUpiAmountInput(value);
+  return UPI_AMOUNT_RE.test(clean) && Number(clean) > 0;
+}
+
+// Normalizes a valid amount to the 2-decimal form the UPI spec and most apps
+// expect (e.g. "499.5" -> "499.50"), and flags amounts above UPI_SOFT_LIMIT.
+export function normalizeUpiAmount(value) {
+  if (!isValidUpiAmount(value)) return { value: "" };
+  if (!isNonEmpty(value)) return { value: "" };
+  const amount = Number(cleanUpiAmountInput(value));
+  return {
+    value: amount.toFixed(2),
+    warn:
+      amount > UPI_SOFT_LIMIT
+        ? `Above ₹${UPI_SOFT_LIMIT.toLocaleString("en-IN")} — many UPI apps will reject this.`
+        : null,
+  };
 }
 
 // Escapes characters with special meaning inside a WIFI: URI field
@@ -115,6 +142,8 @@ const EC_LEVEL_BYTE_CAPACITY = {
   Q: 1663,
   H: 1273,
 };
+
+export const VALID_EC_LEVELS = Object.keys(EC_LEVEL_BYTE_CAPACITY);
 
 export function capacityForLevel(errorCorrectionLevel) {
   return EC_LEVEL_BYTE_CAPACITY[errorCorrectionLevel] ?? EC_LEVEL_BYTE_CAPACITY.M;

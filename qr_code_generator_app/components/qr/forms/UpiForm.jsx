@@ -3,7 +3,7 @@
 import FieldError from "./FieldError";
 import { inputClass, labelClass } from "./styles";
 
-export default function UpiForm({ fields, errors, onFieldChange }) {
+export default function UpiForm({ fields, errors, onFieldChange, hint }) {
   return (
     <div className="w-72 flex flex-col gap-3">
       <div>
@@ -21,6 +21,7 @@ export default function UpiForm({ fields, errors, onFieldChange }) {
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
+          enterKeyHint="next"
         />
         <FieldError id="upi-vpa-error" message={errors.vpa} />
       </div>
@@ -47,13 +48,18 @@ export default function UpiForm({ fields, errors, onFieldChange }) {
           className={inputClass(Boolean(errors.amount))}
           value={fields.amount}
           aria-invalid={Boolean(errors.amount)}
-          aria-describedby={errors.amount ? "upi-amount-error" : undefined}
+          aria-describedby={errors.amount ? "upi-amount-error" : hint ? "upi-amount-hint" : undefined}
           onChange={(e) => onFieldChange("amount", e.target.value)}
           placeholder="100.00"
           type="text"
           inputMode="decimal"
         />
         <FieldError id="upi-amount-error" message={errors.amount} />
+        {!errors.amount && hint && (
+          <p id="upi-amount-hint" className="mt-1 text-sm text-amber-700">
+            {hint}
+          </p>
+        )}
       </div>
       <div>
         <label htmlFor="upi-note" className={labelClass}>
