@@ -96,7 +96,7 @@ export async function renderQrSvgString(text, options, logo) {
   return svgString.replace("</svg>", `${overlay}</svg>`);
 }
 
-function downloadBlob(blob, filename) {
+export function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -126,4 +126,46 @@ export async function downloadPng(text, options, logo, filename = "qrcode.png") 
 
 export async function downloadJpeg(text, options, logo, filename = "qrcode.jpg") {
   return downloadRaster(text, options, logo, "image/jpeg", filename);
+}
+
+export async function getPngBlob(text, options, logo) {
+  const canvas = await renderQrCanvas(text, options, logo);
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.92));
+}
+
+export function canShareFiles(file) {
+  return typeof navigator !== "undefined" && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
+}
+
+// Prefers the native share sheet (the real mobile workflow — "send this to
+// WhatsApp/Messages/Save to Photos") and falls back to a normal download when the
+// Web Share API or file sharing isn't available, or the browser denies it outright.
+export async function shareOrDownloadBlob(blob, filename, title = "QR code") {
+  const file = new File([blob], filename, { type: blob.type });
+  if (canShareFiles(file)) {
+    try {
+      await navigator.share({ files: [file], title });
+      return "shared";
+    } catch (err) {
+      if (err?.name === "AbortError") return "cancelled";
+      // Any other failure (e.g. a permissions quirk) falls through to a download.
+    }
+  }
+  downloadBlob(blob, filename);
+  return "downloaded";
+}
+
+export function canCopyImages() {
+  return (
+    typeof navigator !== "undefined" &&
+    typeof window !== "undefined" &&
+    "clipboard" in navigator &&
+    typeof window.ClipboardItem === "function"
+  );
+}
+
+export async function copyBlobToClipboard(blob) {
+  // Safari requires the ClipboardItem to wrap a Promise<Blob> (not a resolved Blob)
+  // so the permission prompt doesn't block the async canvas render.
+  await navigator.clipboard.write([new window.ClipboardItem({ [blob.type]: Promise.resolve(blob) })]);
 }

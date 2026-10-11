@@ -18,6 +18,7 @@ import { useHistory } from "@/lib/useHistory";
 import { byteLength, capacityForLevel, exceedsCapacity, isNonEmpty } from "@/lib/validators";
 import { downscaleImageDataUrl } from "@/lib/image";
 import { usePersistedOptions } from "@/lib/usePersistedOptions";
+import { generateId } from "@/lib/id";
 
 export default function Home() {
   const [state, dispatch] = useQrBuilder();
@@ -86,7 +87,7 @@ export default function Home() {
     }
 
     const saved = addItem({
-      id: crypto.randomUUID(),
+      id: generateId(),
       type: state.activeType,
       fields: fieldsForHistory,
       options: state.options,
