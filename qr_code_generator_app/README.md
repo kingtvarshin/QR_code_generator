@@ -34,7 +34,10 @@ Open [http://localhost:3000](http://localhost:3000).
   URLs pointing at `localhost` (see `docs/DEPLOY.md`).
 - `npm run preview` — build, then serve the static export at
   [http://localhost:4000](http://localhost:4000) via `serve`, on a different port
-  than `npm run dev` so the two don't fight over the same service worker.
+  than `npm run dev` so the two don't fight over the same service worker. Unlike
+  `npm run build`, this defaults `NEXT_PUBLIC_SITE_URL` to
+  `http://localhost:4000` when it isn't already set — it's a local preview, not
+  a real deployment, so it doesn't need a real public domain.
 - `npm run lint` — ESLint, plus a guard against dead Tailwind class typos
 - `npm run test` — unit tests (Vitest) for the QR encoding/validation logic
 
