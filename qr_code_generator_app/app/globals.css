@@ -54,3 +54,13 @@ input[type="color"] {
   min-height: 44px;
   min-width: 44px;
 }
+
+/* Reserves room for MiniPreview's sticky bottom-right thumbnail (components/qr/
+   MiniPreview.jsx, mobile only) so the last field/buttons in a long form can
+   scroll clear of it instead of ending up underneath it. */
+@media (max-width: 767px) {
+  main {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: 96px;
+  }
+}

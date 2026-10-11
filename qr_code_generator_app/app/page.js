@@ -84,6 +84,7 @@ export default function Home() {
 
   const scanResult = useScanCheck(debouncedEncoded, state.options, state.logo, isReady);
   const previewRef = useRef(null);
+  const formRef = useRef(null);
 
   // One always-mounted live region (rendered unconditionally below) instead of
   // several that mount/unmount with the QR or the scan badge — a screen reader
@@ -186,6 +187,7 @@ export default function Home() {
             flip back and forth while editing. MiniPreview below brings the result
             to the user instead of moving content underneath them. */}
         <div
+          ref={formRef}
           role="tabpanel"
           id="qr-form-panel"
           aria-labelledby={`tab-${state.activeType}`}
@@ -242,7 +244,14 @@ export default function Home() {
         </div>
       </div>
 
-      <MiniPreview previewRef={previewRef} text={debouncedEncoded} options={state.options} isReady={isReady} scanResult={scanResult} />
+      <MiniPreview
+        previewRef={previewRef}
+        formRef={formRef}
+        text={debouncedEncoded}
+        options={state.options}
+        isReady={isReady}
+        scanResult={scanResult}
+      />
 
       <div className="w-full flex flex-col items-center gap-2">
         <h2 className="text-lg font-semibold text-slate-900">History</h2>
