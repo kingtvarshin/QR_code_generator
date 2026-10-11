@@ -138,6 +138,14 @@ export default function Home() {
     });
   }
 
+  // Below `sm` with no payload yet, the form goes first — pushing it below an
+  // empty 240px placeholder box left new users scrolling to find the first
+  // input. Once there's a real QR to see, the preview goes first instead so
+  // typing doesn't happen blind. At `sm` and up these order utilities reset to
+  // source order (form, preview, customize side by side).
+  const mobileFormOrder = isReady ? "order-2" : "order-1";
+  const mobilePreviewOrder = isReady ? "order-1" : "order-2";
+
   return (
     <main className="flex flex-col items-center gap-6 p-4 max-w-5xl mx-auto">
       <h1 className="mt-4 text-3xl font-semibold text-slate-900">QR Forge</h1>
@@ -149,15 +157,12 @@ export default function Home() {
       <TypeSelector activeType={state.activeType} onChange={(typeId) => dispatch({ type: "SET_ACTIVE_TYPE", typeId })} />
 
       <div className="flex flex-wrap justify-center gap-8 w-full">
-        {/* Below `sm`, the preview comes first so users see the result without
-            scrolling past the whole form while typing blind; at `sm` and up these
-            sit side by side and the order utilities are reset to source order. */}
         <div
           role="tabpanel"
           id="qr-form-panel"
           aria-labelledby={`tab-${state.activeType}`}
           onBlurCapture={handleFormBlurCapture}
-          className="order-2 sm:order-none"
+          className={`${mobileFormOrder} sm:order-none`}
         >
           <ActiveForm
             fields={activeFields}
@@ -167,7 +172,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="order-1 sm:order-none flex flex-col items-center gap-3">
+        <div className={`${mobilePreviewOrder} sm:order-none flex flex-col items-center gap-3`}>
           <div className="height_canvas w-60 h-60 flex items-center justify-center overflow-hidden [&_svg]:w-full [&_svg]:h-full [&_canvas]:w-full [&_canvas]:h-full">
             <QRPreview
               text={debouncedEncoded}
