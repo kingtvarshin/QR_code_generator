@@ -167,7 +167,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col items-center gap-6 p-4 max-w-5xl mx-auto">
+    <main className="flex flex-col items-center gap-6 p-4 max-md:pb-[calc(6rem+env(safe-area-inset-bottom))] max-w-5xl mx-auto">
       <h1 className="mt-4 text-3xl font-semibold text-slate-900">QR Forge</h1>
       <p className="text-sm text-gray-600">
         Generate, customize, and download QR codes for URLs, text, phone, SMS, email, WiFi,

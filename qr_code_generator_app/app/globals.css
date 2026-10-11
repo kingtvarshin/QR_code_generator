@@ -55,12 +55,15 @@ input[type="color"] {
   min-width: 44px;
 }
 
-/* Reserves room for MiniPreview's sticky bottom-right thumbnail (components/qr/
-   MiniPreview.jsx, mobile only) so the last field/buttons in a long form can
-   scroll clear of it instead of ending up underneath it. */
+/* Reserves scroll room for MiniPreview's sticky bottom-right thumbnail
+   (components/qr/MiniPreview.jsx, mobile only) so scrolling to the last
+   field/buttons in a long form doesn't leave them sitting right under it.
+   scroll-padding-bottom belongs on the actual scrolling element (the document,
+   via html) — main's own padding-bottom (set via Tailwind's max-md:pb-[...] on
+   the element itself, since a class always beats this bare-element selector on
+   specificity regardless of this media query) handles the visible gap. */
 @media (max-width: 767px) {
-  main {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom));
-    scroll-padding-bottom: 96px;
+  html {
+    scroll-padding-bottom: 6rem;
   }
 }
