@@ -115,7 +115,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center gap-6 p-4 max-w-5xl mx-auto">
-      <h1 className="mt-4 text-3xl font-semibold text-blue-gray-900">QR Forge</h1>
+      <h1 className="mt-4 text-3xl font-semibold text-slate-900">QR Forge</h1>
       <p className="text-sm text-gray-600">
         Generate, customize, and download QR codes for URLs, text, phone, SMS, email, WiFi, and
         contact cards.
@@ -163,7 +163,7 @@ export default function Home() {
       </div>
 
       <div className="w-full flex flex-col items-center gap-2">
-        <h2 className="text-lg font-semibold text-blue-gray-900">History</h2>
+        <h2 className="text-lg font-semibold text-slate-900">History</h2>
         {historyError && (
           <div role="status" className="w-72 text-sm text-amber-800 bg-amber-50 rounded px-3 py-2">
             Couldn&apos;t save to history — your browser&apos;s local storage may be full.

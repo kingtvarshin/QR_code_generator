@@ -59,7 +59,7 @@ export default function HistoryPanel({ items, onLoad, onToggleFavorite, onRemove
   return (
     <div className="w-72 flex flex-col gap-2">
       {undoEntry && (
-        <div role="status" className="flex items-center justify-between gap-2 text-sm bg-blue-gray-50 rounded px-2 py-1">
+        <div role="status" className="flex items-center justify-between gap-2 text-sm bg-slate-50 rounded px-2 py-1">
           <span>Code removed</span>
           <button type="button" className="text-blue-600 font-medium px-2" onClick={handleUndo}>
             Undo

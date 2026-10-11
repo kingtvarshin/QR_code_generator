@@ -13,7 +13,7 @@ const EC_LEVEL_OPTIONS = [
 
 const selectClassName =
   "w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600";
-const labelClassName = "block mb-1 text-sm text-blue-gray-700";
+const labelClassName = "block mb-1 text-sm text-slate-700";
 
 export default function CustomizationPanel({ options, onOptionChange, logo, onLogoChange }) {
   const lowContrast = hasLowContrast(options.colorDark, options.colorLight);
@@ -21,7 +21,7 @@ export default function CustomizationPanel({ options, onOptionChange, logo, onLo
 
   return (
     <div className="w-72 flex flex-col gap-4">
-      <h2 className="text-lg font-semibold text-blue-gray-900">Customize</h2>
+      <h2 className="text-lg font-semibold text-slate-900">Customize</h2>
 
       <div>
         <label htmlFor="ec-level" className={labelClassName}>
@@ -60,7 +60,7 @@ export default function CustomizationPanel({ options, onOptionChange, logo, onLo
       </div>
 
       <div>
-        <label htmlFor="margin" className="text-sm text-blue-gray-700">
+        <label htmlFor="margin" className="text-sm text-slate-700">
           Margin: {options.margin}
         </label>
         <input

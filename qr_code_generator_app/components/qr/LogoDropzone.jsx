@@ -45,7 +45,7 @@ export default function LogoDropzone({ logo, onLogoChange }) {
 
   return (
     <div>
-      <label id="logo-label" className="block mb-1 text-sm text-blue-gray-700">
+      <label id="logo-label" className="block mb-1 text-sm text-slate-700">
         Logo (optional)
       </label>
       <div
