@@ -37,3 +37,68 @@ If step 4 never shows the toast, check that `navigator.serviceWorker.controller`
 was actually set on the *first* load (it's intentionally `null` on a true first
 visit — the toast only fires for a worker update on top of an existing one, not
 the initial install).
+
+## Security headers
+
+`public/_headers` covers Netlify and Cloudflare Pages (they read that file
+directly, no config needed). Other hosts need the equivalent configured at their
+own layer — see below. All three configs apply the same policy as
+`public/_headers`; keep them in sync if that file changes. The CSP's
+`'unsafe-inline'` on `script-src` is a deliberate trade-off, not an oversight:
+the App Router's RSC-hydration script is inline and can't be given a nonce
+without a server runtime to generate one per request, which a static export
+doesn't have.
+
+### nginx
+
+```nginx
+server {
+    # ... your existing server block (root, listen, etc.) ...
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'" always;
+}
+```
+
+### Caddy
+
+```caddyfile
+your-domain.com {
+    root * out
+    file_server
+
+    header {
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    }
+}
+```
+
+### Vercel (`vercel.json`)
+
+Next's own `headers()` config is ignored under `output: "export"` (confirmed via
+a build warning — there's no server to apply it at request time), so on Vercel
+this has to go in `vercel.json` instead, at the project root:
+
+```json
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+        }
+      ]
+    }
+  ]
+}
+```
