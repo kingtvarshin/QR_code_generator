@@ -15,9 +15,11 @@ function HistoryThumbnail({ item }) {
   } catch {
     text = null;
   }
-  if (!text) return <div className="w-8 h-8 shrink-0 bg-gray-100 rounded" aria-hidden="true" />;
+  if (!text) return <div className="w-8 h-8 shrink-0 bg-slate-100 dark:bg-slate-700 rounded" aria-hidden="true" />;
   return (
-    <div className="w-8 h-8 shrink-0" aria-hidden="true">
+    // Deliberately plain white, not dark:bg-slate-* — same scan-contrast
+    // exception as the main preview plate and MiniPreview's thumbnail.
+    <div className="w-8 h-8 shrink-0 bg-white rounded p-0.5" aria-hidden="true">
       <QrSvg text={text} options={{ width: 32, margin: 0 }} />
     </div>
   );
@@ -73,34 +75,42 @@ export default function HistoryPanel({ items, onLoad, onToggleFavorite, onRemove
       {undoEntry && (
         <div
           role="status"
-          className="flex items-center justify-between gap-2 text-sm bg-slate-50 rounded px-2 py-1"
+          className="flex items-center justify-between gap-2 text-sm bg-slate-50 dark:bg-slate-800 dark:text-slate-100 rounded px-2 py-1"
           onMouseEnter={() => clearTimeout(undoTimerRef.current)}
           onMouseLeave={startUndoTimer}
           onFocus={() => clearTimeout(undoTimerRef.current)}
           onBlur={startUndoTimer}
         >
           <span>Code removed</span>
-          <button ref={undoButtonRef} type="button" className="text-blue-600 font-medium px-2" onClick={handleUndo}>
+          <button
+            ref={undoButtonRef}
+            type="button"
+            className="text-indigo-600 dark:text-indigo-400 font-medium px-2"
+            onClick={handleUndo}
+          >
             Undo
           </button>
         </div>
       )}
 
       {items.length === 0 ? (
-        <p className="text-sm text-gray-500">Codes you download will show up here.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Codes you download will show up here.</p>
       ) : (
         <>
           <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto">
             {items.map((item) => (
-              <li key={item.id} className="flex items-center gap-2 border border-gray-200 rounded px-2 py-1">
+              <li
+                key={item.id}
+                className="flex items-center gap-2 rounded-xl border border-slate-200/70 dark:border-slate-700/60 bg-white/50 dark:bg-slate-800/40 backdrop-blur-sm px-2 py-1 transition-colors hover:bg-white/80 dark:hover:bg-slate-800/70"
+              >
                 <HistoryThumbnail item={item} />
                 <button type="button" className="text-left flex-1 min-w-0" onClick={() => onLoad(item)} title={item.label}>
-                  <span className="block truncate text-sm">{item.label}</span>
-                  <span className="block text-xs text-gray-500">{formatTimestamp(item.createdAt)}</span>
+                  <span className="block truncate text-sm text-slate-900 dark:text-slate-100">{item.label}</span>
+                  <span className="block text-xs text-slate-500 dark:text-slate-400">{formatTimestamp(item.createdAt)}</span>
                 </button>
                 <button
                   type="button"
-                  className="p-2 rounded hover:bg-gray-100"
+                  className="p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
                   aria-label={item.isFavorite ? `Unfavorite ${item.label}` : `Favorite ${item.label}`}
                   aria-pressed={item.isFavorite}
                   onClick={() => onToggleFavorite(item.id)}
@@ -108,21 +118,25 @@ export default function HistoryPanel({ items, onLoad, onToggleFavorite, onRemove
                   {item.isFavorite ? (
                     <StarSolid className="w-4 h-4 text-amber-500" />
                   ) : (
-                    <StarOutline className="w-4 h-4" />
+                    <StarOutline className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                   )}
                 </button>
                 <button
                   type="button"
-                  className="p-2 rounded hover:bg-gray-100"
+                  className="p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
                   aria-label={`Delete ${item.label}`}
                   onClick={() => handleRemove(item)}
                 >
-                  <TrashIcon className="w-4 h-4 text-red-500" />
+                  <TrashIcon className="w-4 h-4 text-red-500 dark:text-red-400" />
                 </button>
               </li>
             ))}
           </ul>
-          <button type="button" className="self-start text-sm text-red-600 font-medium px-2 py-1" onClick={onClearAll}>
+          <button
+            type="button"
+            className="self-start text-sm text-red-600 dark:text-red-400 font-medium px-2 py-1"
+            onClick={onClearAll}
+          >
             Clear all (keeps favorites)
           </button>
         </>

@@ -5,7 +5,7 @@ import { inputClass, labelClass } from "./styles";
 
 export default function EmailForm({ fields, errors, onFieldChange }) {
   return (
-    <div className="w-72 flex flex-col gap-3">
+    <div className="w-full flex flex-col gap-3">
       <div>
         <label htmlFor="email-email" className={labelClass}>
           Email address

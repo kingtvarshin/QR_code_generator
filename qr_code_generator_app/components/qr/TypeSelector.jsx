@@ -83,9 +83,14 @@ export default function TypeSelector({ activeType, onChange }) {
             tabIndex={isActive ? 0 : -1}
             onClick={() => onChange(typeId)}
             onKeyDown={(event) => handleKeyDown(event, index)}
-            className={`shrink-0 snap-start flex items-center gap-2 min-h-11 px-3 rounded-lg text-sm font-medium whitespace-nowrap
-              focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600
-              ${isActive ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
+            className={`shrink-0 snap-start flex items-center gap-2 min-h-11 px-3 rounded-full text-sm font-medium whitespace-nowrap
+              transition-colors duration-200
+              focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500
+              ${
+                isActive
+                  ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800"
+              }`}
           >
             <Icon className="w-5 h-5" aria-hidden="true" />
             {qrTypes[typeId].label}

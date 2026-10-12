@@ -45,7 +45,7 @@ export default function LogoDropzone({ logo, onLogoChange }) {
 
   return (
     <div>
-      <label id="logo-label" className="block mb-1 text-sm text-slate-700">
+      <label id="logo-label" className="block mb-1 text-sm text-slate-700 dark:text-slate-300">
         Logo (optional)
       </label>
       <div
@@ -61,16 +61,20 @@ export default function LogoDropzone({ logo, onLogoChange }) {
         onDragLeave={() => setIsDragOver(false)}
         onDrop={handleDrop}
         onPaste={handlePaste}
-        className={`flex items-center gap-3 border-2 border-dashed rounded-lg p-3 cursor-pointer transition-colors
-          ${isDragOver ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"}`}
+        className={`flex items-center gap-3 border-2 border-dashed rounded-xl p-3 cursor-pointer transition-colors
+          ${
+            isDragOver
+              ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40"
+              : "border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500"
+          }`}
       >
         {logo?.dataUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- a transient user-uploaded data: URL, not a static/optimizable asset
           <img src={logo.dataUrl} alt="Uploaded logo preview" className="w-10 h-10 object-contain rounded bg-white" />
         ) : (
-          <div className="w-10 h-10 rounded bg-gray-100" aria-hidden="true" />
+          <div className="w-10 h-10 rounded bg-slate-100 dark:bg-slate-700" aria-hidden="true" />
         )}
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-slate-600 dark:text-slate-400">
           {logo?.dataUrl ? "Click, drop, or paste to replace" : "Click, drop, or paste an image"}
         </span>
       </div>
@@ -86,7 +90,7 @@ export default function LogoDropzone({ logo, onLogoChange }) {
       {logo && (
         <button
           type="button"
-          className="mt-1 text-sm text-red-600 font-medium px-2 py-1"
+          className="mt-1 text-sm text-red-600 dark:text-red-400 font-medium px-2 py-1"
           onClick={() => onLogoChange(null)}
         >
           Remove logo

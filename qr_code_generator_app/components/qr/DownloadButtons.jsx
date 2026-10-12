@@ -23,7 +23,7 @@ function ActionButton({ label, busy, disabled, onClick }) {
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="px-3 py-2 text-sm font-medium rounded bg-blue-600 text-white disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-700 disabled:hover:bg-gray-300"
+      className="px-3 py-2 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-violet-600 shadow-md shadow-indigo-600/25 transition-all duration-200 hover:from-indigo-500 hover:to-violet-500 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 dark:disabled:from-slate-700 dark:disabled:to-slate-700 dark:disabled:text-slate-400"
     >
       {busy ? "…" : label}
     </button>

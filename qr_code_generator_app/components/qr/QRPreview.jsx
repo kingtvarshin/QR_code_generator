@@ -14,7 +14,7 @@ const PREVIEW_WIDTH = 240;
 function Placeholder({ children }) {
   return (
     <div className="w-60 h-60 flex items-center justify-center text-center px-4">
-      <p className="text-sm text-gray-500">{children}</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400">{children}</p>
     </div>
   );
 }

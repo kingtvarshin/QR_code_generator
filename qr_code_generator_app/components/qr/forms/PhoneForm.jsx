@@ -5,7 +5,7 @@ import { inputClass, labelClass } from "./styles";
 
 export default function PhoneForm({ fields, errors, onFieldChange }) {
   return (
-    <div className="w-72">
+    <div className="w-full">
       <label htmlFor="phone-phone" className={labelClass}>
         Phone number
       </label>

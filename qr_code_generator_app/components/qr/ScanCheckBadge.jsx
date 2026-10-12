@@ -16,11 +16,11 @@ export default function ScanCheckBadge({ result }) {
   // load) — distinct from an actual pass or fail, so it gets a neutral message
   // rather than silently disappearing or reading as a scan failure.
   if (result.ok === null) {
-    return <p className="text-sm text-gray-500">Scan check unavailable offline.</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">Scan check unavailable offline.</p>;
   }
 
   return (
-    <p className={`text-sm ${result.ok ? "text-green-700" : "text-amber-700"}`}>
+    <p className={`text-sm ${result.ok ? "text-green-700 dark:text-green-400" : "text-amber-700 dark:text-amber-400"}`}>
       {result.ok ? "✓ Scannable" : WARNING_BY_REASON[result.reason] ?? WARNING_BY_REASON.unreadable}
     </p>
   );

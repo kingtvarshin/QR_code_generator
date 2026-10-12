@@ -5,7 +5,7 @@ import { inputClass, labelClass } from "./styles";
 
 export default function UrlForm({ fields, errors, onFieldChange }) {
   return (
-    <div className="w-72">
+    <div className="w-full">
       <label htmlFor="url-url" className={labelClass}>
         Website URL
       </label>
