@@ -74,13 +74,13 @@ export default function MiniPreview({ previewRef, formRef, text, options, isRead
   if (!isReady || mainVisible || formFocused || keyboardLikelyOpen) return null;
 
   const status = scanStatusLabel(scanResult);
-  let statusColor = "text-slate-700";
+  let statusColor = "text-slate-700 dark:text-slate-300";
   let statusIcon = "";
   if (scanResult?.ok === true) {
-    statusColor = "text-green-700";
+    statusColor = "text-green-700 dark:text-green-400";
     statusIcon = "✓ ";
   } else if (scanResult?.ok === false) {
-    statusColor = "text-amber-700";
+    statusColor = "text-amber-700 dark:text-amber-400";
     statusIcon = "⚠ ";
   }
   const statusText = status ? `${statusIcon}${status}` : "QR ready";
@@ -90,16 +90,22 @@ export default function MiniPreview({ previewRef, formRef, text, options, isRead
       type="button"
       onClick={() => previewRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
       aria-label={`Show QR code. ${status ?? "ready"}`}
-      className="md:hidden fixed right-3 z-40 flex items-center gap-2 rounded-xl bg-white p-2 shadow-lg ring-1 ring-slate-200"
+      className="md:hidden fixed right-3 z-40 flex items-center gap-2 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-2 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 transition-transform duration-150 hover:scale-105 active:scale-95"
       style={{ bottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
     >
-      <span className="h-14 w-14 shrink-0 [&>div]:h-full [&>div]:w-full [&_svg]:h-full [&_svg]:w-full" aria-hidden="true">
+      {/* Deliberately plain white, not dark:bg-slate-* — the QR needs real
+          scan contrast regardless of page theme, same as the main preview's
+          plate in page.js. */}
+      <span
+        className="h-14 w-14 shrink-0 rounded-md bg-white p-0.5 [&>div]:h-full [&>div]:w-full [&_svg]:h-full [&_svg]:w-full"
+        aria-hidden="true"
+      >
         <QrSvg text={text} options={{ ...options, width: 56, margin: 1 }} />
       </span>
       <span className="pr-1 text-sm text-left leading-tight">
         <span className={statusColor}>{statusText}</span>
         <br />
-        <span className="text-blue-700">View ↑</span>
+        <span className="text-indigo-600 dark:text-indigo-400">View ↑</span>
       </span>
     </button>
   );

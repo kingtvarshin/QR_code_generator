@@ -5,7 +5,7 @@ import { inputClass, labelClass } from "./styles";
 
 export default function WhatsAppForm({ fields, errors, onFieldChange, hint }) {
   return (
-    <div className="w-72 flex flex-col gap-3">
+    <div className="w-full flex flex-col gap-3">
       <div>
         <label htmlFor="whatsapp-phone" className={labelClass}>
           Phone number (with country code)
@@ -24,7 +24,7 @@ export default function WhatsAppForm({ fields, errors, onFieldChange, hint }) {
         />
         <FieldError id="whatsapp-phone-error" message={errors.phone} />
         {!errors.phone && hint && (
-          <p id="whatsapp-phone-hint" className="mt-1 text-sm text-gray-500">
+          <p id="whatsapp-phone-hint" className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {hint}
           </p>
         )}

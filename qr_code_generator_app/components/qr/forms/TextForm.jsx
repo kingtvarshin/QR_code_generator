@@ -7,7 +7,7 @@ export default function TextForm({ fields, errors, onFieldChange }) {
   const rows = Math.max(3, Math.min(12, fields.text.split("\n").length + 1));
 
   return (
-    <div className="w-72">
+    <div className="w-full">
       <label htmlFor="text-text" className={labelClass}>
         Text
       </label>

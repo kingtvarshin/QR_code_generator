@@ -29,17 +29,32 @@ export const metadata = {
   twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
 };
 
-// The page itself has no dark styles (no `dark:` classes, no prefers-color-scheme
-// rules), so a dark theme-color here would turn a phone's status bar dark over an
-// otherwise all-white page — only declare the one color the page actually has.
+// Covers the OS-level default before the user has made an explicit choice —
+// lib/useTheme.js patches this meta tag imperatively once they toggle, since a
+// manual choice should override the media-query default it was initialized from.
 export const viewport = {
-  themeColor: "#ffffff",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#eef2ff" },
+    { media: "(prefers-color-scheme: dark)", color: "#020617" },
+  ],
 };
+
+// Runs synchronously before first paint (a plain inline script, not next/script,
+// which defers) so the page never flashes the wrong theme while React hydrates.
+// suppressHydrationWarning on <html> is required because this script mutates
+// documentElement's class outside React's render — without it React logs a
+// (harmless) mismatch warning for a change it didn't make itself.
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("qr-forge-theme");var d=t?t==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body
+        className={`${inter.className} min-h-screen bg-gradient-to-br from-indigo-100 via-violet-50 to-fuchsia-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 text-slate-900 dark:text-slate-100 transition-colors duration-300`}
+      >
         {children}
         <ServiceWorkerRegistration />
       </body>

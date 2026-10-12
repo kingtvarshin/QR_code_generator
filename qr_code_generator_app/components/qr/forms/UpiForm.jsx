@@ -5,7 +5,7 @@ import { inputClass, labelClass } from "./styles";
 
 export default function UpiForm({ fields, errors, onFieldChange, hint }) {
   return (
-    <div className="w-72 flex flex-col gap-3">
+    <div className="w-full flex flex-col gap-3">
       <div>
         <label htmlFor="upi-vpa" className={labelClass}>
           Payee UPI ID (VPA)

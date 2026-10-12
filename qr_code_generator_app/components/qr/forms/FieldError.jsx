@@ -6,7 +6,7 @@
 export default function FieldError({ id, message }) {
   if (!message) return null;
   return (
-    <p id={id} className="mt-1 text-xs text-red-500">
+    <p id={id} className="mt-1 text-xs text-red-500 dark:text-red-400">
       {message}
     </p>
   );

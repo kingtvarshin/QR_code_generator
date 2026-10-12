@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 import TypeSelector from "@/components/qr/TypeSelector";
 import QRPreview from "@/components/qr/QRPreview";
 import ScanCheckBadge from "@/components/qr/ScanCheckBadge";
@@ -20,6 +21,7 @@ import { useHistory } from "@/lib/useHistory";
 import { byteLength, capacityForLevel, exceedsCapacity, isNonEmpty } from "@/lib/validators";
 import { downscaleImageDataUrl } from "@/lib/image";
 import { usePersistedOptions } from "@/lib/usePersistedOptions";
+import { useTheme } from "@/lib/useTheme";
 import { scanStatusLabel, useScanCheck } from "@/lib/useScanCheck";
 import { generateId } from "@/lib/id";
 
@@ -29,6 +31,7 @@ import { generateId } from "@/lib/id";
 const ANNOUNCE_DEBOUNCE_MS = 800;
 
 export default function Home() {
+  const { theme, toggleTheme } = useTheme();
   const [state, dispatch] = useQrBuilder();
   const { history, addItem, removeItem, toggleFavorite, clearAll } = useHistory();
   const [historyError, setHistoryError] = useState(false);
@@ -168,8 +171,20 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center gap-6 p-4 max-md:pb-[calc(6rem+env(safe-area-inset-bottom))] max-w-5xl mx-auto">
-      <h1 className="mt-4 text-3xl font-semibold text-slate-900">QR Forge</h1>
-      <p className="text-sm text-gray-600">
+      <div className="mt-4 flex items-center gap-3">
+        <h1 className="text-3xl font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">
+          QR Forge
+        </h1>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+          className="rounded-full p-2 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+        >
+          {theme === "dark" ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+        </button>
+      </div>
+      <p className="text-sm text-slate-600 dark:text-slate-400">
         Generate, customize, and download QR codes for URLs, text, phone, SMS, email, WiFi,
         contact cards, WhatsApp, and UPI payments.
       </p>
@@ -192,7 +207,7 @@ export default function Home() {
           id="qr-form-panel"
           aria-labelledby={`tab-${state.activeType}`}
           onBlurCapture={handleFormBlurCapture}
-          className="order-1 sm:order-none"
+          className="order-1 sm:order-none w-72 self-start rounded-2xl border border-white/60 dark:border-slate-700/60 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md shadow-lg shadow-indigo-900/5 p-5"
         >
           <ActiveForm
             fields={activeFields}
@@ -205,18 +220,24 @@ export default function Home() {
         <div className="order-2 sm:order-none flex flex-col items-center gap-3">
           <div
             ref={previewRef}
-            className="height_canvas w-60 h-60 flex items-center justify-center overflow-hidden [&_svg]:w-full [&_svg]:h-full [&_canvas]:w-full [&_canvas]:h-full"
+            className="w-60 h-60 flex items-center justify-center rounded-2xl border border-white/60 dark:border-slate-700/60 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md shadow-lg shadow-indigo-900/10 p-3"
           >
-            <QRPreview
-              text={debouncedEncoded}
-              options={state.options}
-              logo={state.logo}
-              isReady={isReady}
-              errorMessage={errorMessage}
-            />
+            {/* Deliberately plain white, not dark:bg-slate-* — the QR needs
+                real contrast to scan regardless of page theme. Exported
+                PNG/JPEG/SVG colors come from the user's own colorDark/colorLight
+                options and are unaffected by this wrapper either way. */}
+            <div className="w-full h-full flex items-center justify-center overflow-hidden rounded-xl bg-white [&_svg]:w-full [&_svg]:h-full [&_canvas]:w-full [&_canvas]:h-full">
+              <QRPreview
+                text={debouncedEncoded}
+                options={state.options}
+                logo={state.logo}
+                isReady={isReady}
+                errorMessage={errorMessage}
+              />
+            </div>
           </div>
           {isReady && activeTypeDef.preview && (
-            <p className="text-sm font-medium text-slate-900">{activeTypeDef.preview(activeFields)}</p>
+            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{activeTypeDef.preview(activeFields)}</p>
           )}
           <ScanCheckBadge result={scanResult} />
           <DownloadButtons
@@ -228,7 +249,11 @@ export default function Home() {
             disabled={!isReady}
             onDownload={handleDownloadLogged}
           />
-          <p className={`text-sm ${payloadBytes > capacityBytes ? "text-red-600" : "text-gray-500"}`}>
+          <p
+            className={`text-sm ${
+              payloadBytes > capacityBytes ? "text-red-600 dark:text-red-400" : "text-slate-500 dark:text-slate-400"
+            }`}
+          >
             {payloadBytes.toLocaleString()} / {capacityBytes.toLocaleString()} bytes at{" "}
             {state.options.errorCorrectionLevel}
           </p>
@@ -254,9 +279,12 @@ export default function Home() {
       />
 
       <div className="w-full flex flex-col items-center gap-2">
-        <h2 className="text-lg font-semibold text-slate-900">History</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">History</h2>
         {historyError && (
-          <div role="status" className="w-72 text-sm text-amber-800 bg-amber-50 rounded px-3 py-2">
+          <div
+            role="status"
+            className="w-72 text-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 rounded px-3 py-2"
+          >
             Couldn&apos;t save to history — your browser&apos;s local storage may be full.
           </div>
         )}
